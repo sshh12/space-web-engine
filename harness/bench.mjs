@@ -19,6 +19,7 @@ import { resolve } from 'node:path';
 import { renderShots, ROOT } from './shots.mjs';
 import { metricsFor } from './metrics.mjs';
 import { SYSTEM, bodyById } from '../src/core/recipe.js';
+import { validateSpec } from '../src/scenespec.js';
 import { forEachBasin } from '../src/core/bakecore.js';
 import { makeCloudKeyframes, cloudCovJS, cloudKeyOf } from '../src/core/cloudcore.js';
 import { globalFor } from '../src/core/globalgrid.js';
@@ -162,6 +163,11 @@ const shots = [
   ...(FILTER ? [] : buildControls(SEED)),          // controls only on a full run
 ];
 console.log(`${shots.length} shots (seed ${SEED}, parallel ${PARALLEL})`);
+// validate every spec against the SceneSpec schema BEFORE the (slow) render — a typo'd
+// field is a fail-fast here instead of a mystery zero-delta scene 15 minutes later.
+let invalid = 0;
+for (const s of shots) { const v = validateSpec(s.spec); if (!v.ok) { invalid++; console.error(`  INVALID ${s.name}: ${v.errors.join('; ')}`); } }
+if (invalid) { console.error(`${invalid} spec(s) fail the schema — fix before rendering.`); process.exit(1); }
 for (const s of shots) if (s.expected) console.log(`  ${s.name}: expected-delta (${s.expected})`);
 
 const recs = await renderShots(shots, { out: resolve(ROOT, 'harness/out'), parallel: PARALLEL, seed: SEED });
