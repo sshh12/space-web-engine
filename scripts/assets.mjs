@@ -29,7 +29,7 @@ import { buildMsLUT } from '../src/atmolut.js';
 import { makeBaker, bakeDiscMap } from '../src/bakecore.js';
 
 const ROOT = resolve(fileURLToPath(import.meta.url), '../..');
-const OUT = resolve(ROOT, 'assets');
+const OUT = resolve(ROOT, 'cache');
 const CHECK = process.argv.includes('--check');
 
 const u8 = (arr) => Buffer.from(arr.buffer, arr.byteOffset, arr.byteLength);

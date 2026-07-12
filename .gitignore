@@ -2,9 +2,15 @@ node_modules/
 .env
 shots/
 shots-*/
-bench/out/
 __pycache__/
 *.pyc
-# generated asset blobs (re-derivable from the recipe); the manifest of hashes
-# is committed as the determinism contract — see scripts/assets.mjs
-assets/*.bin
+
+# cache/ — disposable generated blobs keyed by (recipeHash, bodyId), plus the
+# manifest (a cache-internal staleness index, NOT a committed contract; a pin
+# would fight JIT system generation). Re-derivable from the recipe; determinism
+# is proven by test/assets-test.mjs, not by a committed hash file.
+cache/
+
+# harness run outputs (stills, boards) stay local; only baseline/metrics.json commits
+harness/out/
+harness/baseline/*.png
