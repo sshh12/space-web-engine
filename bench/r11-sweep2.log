@@ -1,0 +1,131 @@
+63 shots -> C:\dev\planet-render\bench\out\stills
+loading http://localhost:8131/planet.html?fast=1
+blue-marble  slope -2.933 kurt 314.911 shadow 0.9276 mean 0.0401  (6.4s)
+crescent-limb  slope -2.978 kurt 804.195 shadow 0.9213 mean 0.0234  (8.4s)
+loworbit-sunset  slope -4.934 kurt 96.262 shadow 0.699 mean 0.2545  (23.6s)
+night-hemisphere  slope -1.985 kurt 510.128 shadow 0.9265 mean 0.0205  (19.0s)
+alpen-dawn  slope -2.215 kurt 99.537 shadow 0.0848 mean 0.0957  (156.8s)
+coast-400km  slope -4.141 kurt 45.957 shadow 0.1873 mean 0.183  (37.6s)
+beach-eye  slope -2.432 kurt 49.364 shadow 0.392 mean 0.1672  (159.8s)
+earthrise  slope -2.994 kurt 635.728 shadow 0.6051 mean 0.2894  (151.6s)
+luna-terminator  slope -2.911 kurt 146.709 shadow 0.884 mean 0.0951  (7.6s)
+luna-boulderfield  slope -1.69 kurt 24.564 shadow 0.6729 mean 0.2243  (320.5s)
+rubra-canyon-dawn  slope -2.747 kurt 251.688 shadow 0.154 mean 0.1231  (159.0s)
+rubra-blue-sunset  slope -2.979 kurt 887.302 shadow 0.623 mean 0.1741  (166.7s)
+transit-shadow  slope -2.939 kurt 119.019 shadow 0.7578 mean 0.0935  (14.2s)
+lunar-eclipse-ring  slope -2.848 kurt 287.757 shadow 0.6151 mean 0.0037  (156.6s)
+lunar-eclipse-ground  slope -2.933 kurt 34.812 shadow 0.3816 mean 0.3649  (160.5s)
+rubra-dust-limb  slope -3.343 kurt 287.922 shadow 0.8769 mean 0.07  (8.4s)
+lod-ladder-descent-00-20000000m  slope -3.112 kurt 558.346 shadow 0.8901 mean 0.0521  (8.2s)
+lod-ladder-descent-01-5000000m  slope -3.711 kurt 19.945 shadow 0.2915 mean 0.2927  (31.5s)
+lod-ladder-descent-02-1200000m  slope -4.213 kurt 45.832 shadow 0 mean 0.0792  (36.5s)
+lod-ladder-descent-03-300000m  slope -4.099 kurt 11.623 shadow 0 mean 0.0846  (48.1s)
+lod-ladder-descent-04-80000m  slope -3.761 kurt 106.81 shadow 0.1829 mean 0.1637  (48.6s)
+lod-ladder-descent-05-20000m  slope -2.862 kurt 420.767 shadow 0.2743 mean 0.1581  (156.7s)
+lod-ladder-descent-06-5000m  slope -2.705 kurt 305.988 shadow 0.103 mean 0.093  (158.2s)
+lod-ladder-descent-07-1200m  slope -1.843 kurt 52.803 shadow 0.0136 mean 0.0831  (157.6s)
+lod-ladder-descent-08-300m  slope -2.659 kurt 182.81 shadow 0.0062 mean 0.0801  (160.3s)
+lod-ladder-descent-09-80m  slope -1.814 kurt 162.34 shadow 0.0043 mean 0.0793  (157.9s)
+lod-ladder-descent-10-20m  slope -2.067 kurt 126.36 shadow 0.0048 mean 0.0791  (161.7s)
+lod-ladder-descent-11-5m  slope -2.315 kurt 153.501 shadow 0.0066 mean 0.0801  (161.9s)
+orbit-pan  slope -1.059 kurt 2078.738 shadow 0.016 mean 0.0817  (51.5s)
+cube-edge-flyover  slope -3.082 kurt 424.446 shadow 0.1158 mean 0.1006  (157.7s)
+ecotone-traverse  slope -3.621 kurt 118.718 shadow 0.6117 mean 0.2264  (36.9s)
+shoreline-graze  slope -2.961 kurt 755.205 shadow 0.3016 mean 0.1135  (154.8s)
+mountain-limb  slope -3.337 kurt 104.642 shadow 0.6989 mean 0.177  (29.7s)
+terminator-cross  slope -1.777 kurt 13164.578 shadow 0 mean 0.0804  (43.2s)
+polar-cap-margin  slope -2.295 kurt 66.143 shadow 0.2598 mean 0.2391  (39.4s)
+crater-rim-walk  slope -2.566 kurt 22.103 shadow 0.3752 mean 0.4122  (310.8s)
+dune-field-edge  slope -2.729 kurt 47.48 shadow 0.2791 mean 0.0982  (110.8s)
+river-outlet  slope -3.588 kurt 141.574 shadow 0.5362 mean 0.2797  (173.0s)
+luna-knife-edge  slope -3.024 kurt 175.032 shadow 0.2692 mean 0.033  (163.4s)
+moon-sizes-fov55  slope -1.978 kurt 43531.418 shadow 0 mean 0  (5.2s)
+moon-sizes-fov30  slope -2.668 kurt 20622.908 shadow 0 mean 0.0001  (150.7s)
+moon-sizes-fov8  slope -2.951 kurt 5645.212 shadow 0 mean 0.0009  (150.7s)
+moon-sizes-fov3  slope -2.949 kurt 2275.2 shadow 0 mean 0.0062  (150.8s)
+terminator-split  slope -2.963 kurt 301.231 shadow 0.7259 mean 0.1182  (30.5s)
+open-ocean-orbit  slope -1.488 kurt 2.999 shadow 0 mean 0.082  (48.5s)
+open-ocean-glint  slope -3.304 kurt 331.428 shadow 0.3704 mean 0.1443  (26.2s)
+boulder-macro-tellus  slope -2.003 kurt 20.549 shadow 0.0122 mean 0.0831  (310.4s)
+boulder-macro-rubra  slope -2.129 kurt 16.821 shadow 0.2993 mean 0.1086  (315.0s)
+boulder-macro-luna  slope -2.027 kurt 18.359 shadow 0.5708 mean 0.2377  (315.8s)
+pavement-walk-rubra  slope -1.995 kurt 17.005 shadow 0.2357 mean 0.1251  (319.7s)
+pavement-walk-luna  slope -2.386 kurt 20.762 shadow 0.7123 mean 0.1519  (312.4s)
+cliff-bench-tellus  slope -2.142 kurt 70.553 shadow 0.0443 mean 0.0903  (154.3s)
+cliff-bench-rubra  slope -2.717 kurt 301.772 shadow 0.2563 mean 0.1378  (156.5s)
+ocean-sunset-glint  slope -2.695 kurt 402.85 shadow 0.566 mean 0.0906  (189.5s)
+coast-archipelago  slope -1.992 kurt 105.124 shadow 0.2509 mean 0.1109  (185.8s)
+control-20260706-0  slope -2.916 kurt 581.343 shadow 0.5829 mean 0.303  (151.6s)
+control-20260706-1  slope -3.519 kurt 95.346 shadow 0.6903 mean 0.1851  (20.2s)
+control-20260706-2  slope -2.161 kurt 152.354 shadow 0.013 mean 0.0856  (160.2s)
+control-20260706-3  slope -2.235 kurt 309.082 shadow 0.5316 mean 0.0142  (24.1s)
+control-20260706-4  slope -2.692 kurt 43.836 shadow 0.5195 mean 0.3035  (154.8s)
+control-20260706-5  slope -3.902 kurt 130.668 shadow 0.769 mean 0.1228  (7.5s)
+control-20260706-6  slope -2.821 kurt 42.803 shadow 0.5895 mean 0.2314  (40.1s)
+control-20260706-7  slope -3.069 kurt 212.413 shadow 0.6752 mean 0.3009  (8.5s)
+wrote C:\dev\planet-render\bench\out\metrics.json
+
+== deltas vs baseline (gate on control tier only) ==
+blue-marble.png: dslope 0.000 dkurt 0.129 dshadow 0.000 dmean 0.000
+crescent-limb.png: dslope 0.000 dkurt 4.418 dshadow -0.000 dmean -0.000
+loworbit-sunset.png: dslope -0.024 dkurt 1.040 dshadow 0.000 dmean -0.002
+night-hemisphere.png: dslope -0.002 dkurt -1.360 dshadow -0.000 dmean 0.000
+alpen-dawn.png: dslope 0.511 dkurt -99.156 dshadow -0.005 dmean 0.002
+coast-400km.png: dslope -0.005 dkurt -0.387 dshadow 0.000 dmean 0.000
+beach-eye.png: dslope -0.192 dkurt 26.738 dshadow -0.003 dmean 0.002
+earthrise.png: dslope 0.009 dkurt 49.204 dshadow 0.001 dmean 0.001
+luna-terminator.png: dslope 0.024 dkurt -3.647 dshadow 0.000 dmean -0.001
+luna-boulderfield.png: dslope 1.191 dkurt -254.278 dshadow 0.353 dmean -0.193
+rubra-canyon-dawn.png: dslope -0.025 dkurt -60.844 dshadow 0.000 dmean 0.001
+rubra-blue-sunset.png: dslope -0.011 dkurt 5.202 dshadow -0.001 dmean 0.000
+transit-shadow.png: dslope -0.007 dkurt -0.013 dshadow -0.000 dmean 0.002
+lunar-eclipse-ring.png: dslope 0.003 dkurt -86.251 dshadow -0.001 dmean 0.001
+lunar-eclipse-ground.png: dslope -0.005 dkurt -529.331 dshadow -0.041 dmean 0.030
+rubra-dust-limb.png: dslope -0.001 dkurt 3.668 dshadow 0.000 dmean -0.000
+lod-ladder-descent-00-20000000m.png: dslope 0.002 dkurt 2.762 dshadow 0.000 dmean -0.001
+lod-ladder-descent-01-5000000m.png: dslope 0.001 dkurt -0.202 dshadow 0.000 dmean -0.000
+lod-ladder-descent-02-1200000m.png: dslope 0.000 dkurt 0.171 dshadow 0.000 dmean 0.000
+lod-ladder-descent-03-300000m.png: dslope -0.001 dkurt -0.098 dshadow 0.000 dmean 0.000
+lod-ladder-descent-04-80000m.png: dslope -0.001 dkurt 0.186 dshadow 0.000 dmean 0.000
+lod-ladder-descent-05-20000m.png: dslope 0.007 dkurt -6.908 dshadow 0.000 dmean 0.000
+lod-ladder-descent-06-5000m.png: dslope -0.114 dkurt -9.013 dshadow -0.000 dmean 0.000
+lod-ladder-descent-07-1200m.png: dslope -0.017 dkurt -4.157 dshadow 0.000 dmean 0.000
+lod-ladder-descent-08-300m.png: dslope -0.048 dkurt 30.441 dshadow 0.000 dmean 0.000
+lod-ladder-descent-09-80m.png: dslope 0.680 dkurt -32.811 dshadow 0.000 dmean 0.000
+lod-ladder-descent-10-20m.png: dslope 0.138 dkurt -18.987 dshadow 0.001 dmean 0.000
+lod-ladder-descent-11-5m.png: dslope 0.066 dkurt -25.134 dshadow 0.004 dmean 0.000
+orbit-pan.png: dslope 1.355 dkurt 2071.457 dshadow -0.022 dmean -0.001
+cube-edge-flyover.png: dslope 0.228 dkurt 29.905 dshadow 0.004 dmean -0.000
+ecotone-traverse.png: dslope 0.010 dkurt -0.068 dshadow 0.000 dmean -0.002
+shoreline-graze.png: dslope 0.002 dkurt -1.007 dshadow -0.000 dmean 0.000
+mountain-limb.png: dslope 0.365 dkurt -215.185 dshadow 0.001 dmean 0.010
+terminator-cross.png: dslope -0.030 dkurt -2376.321 dshadow 0.000 dmean 0.001
+polar-cap-margin.png: dslope 0.017 dkurt 0.406 dshadow -0.000 dmean 0.003
+crater-rim-walk.png: dslope 0.058 dkurt -6.384 dshadow 0.006 dmean -0.010
+dune-field-edge.png: dslope -0.030 dkurt -5.521 dshadow 0.014 dmean -0.003
+river-outlet.png: dslope -0.155 dkurt 16.948 dshadow -0.002 dmean 0.020
+luna-knife-edge.png: dslope -0.468 dkurt -844.641 dshadow 0.000 dmean -0.000
+moon-sizes-fov55.png: dslope 0.000 dkurt 0.000 dshadow 0.000 dmean 0.000
+moon-sizes-fov30.png: dslope 0.000 dkurt 0.000 dshadow 0.000 dmean 0.000
+moon-sizes-fov8.png: dslope 0.000 dkurt 0.000 dshadow 0.000 dmean 0.000
+moon-sizes-fov3.png: dslope 0.000 dkurt 0.000 dshadow 0.000 dmean 0.000
+terminator-split.png: dslope 0.005 dkurt -1.509 dshadow 0.001 dmean -0.002
+open-ocean-orbit.png: dslope 0.000 dkurt -0.510 dshadow 0.000 dmean -0.000
+open-ocean-glint.png: dslope 0.000 dkurt 0.029 dshadow 0.000 dmean 0.000
+boulder-macro-tellus.png: dslope -0.523 dkurt -0.545 dshadow -0.017 dmean 0.003
+boulder-macro-rubra.png: dslope 0.021 dkurt -2.680 dshadow 0.011 dmean -0.002
+boulder-macro-luna.png: dslope 0.716 dkurt -48.919 dshadow 0.066 dmean -0.173
+pavement-walk-rubra.png: dslope 0.063 dkurt 1.597 dshadow 0.011 dmean -0.003
+pavement-walk-luna.png: dslope 0.196 dkurt -12.975 dshadow 0.057 dmean -0.067
+cliff-bench-tellus.png: dslope -0.011 dkurt 12.142 dshadow 0.003 dmean 0.001
+cliff-bench-rubra.png: dslope -0.202 dkurt 25.366 dshadow -0.000 dmean 0.001
+ocean-sunset-glint.png: dslope 0.003 dkurt 133.706 dshadow 0.030 dmean -0.046
+coast-archipelago.png: dslope 1.056 dkurt -87.221 dshadow 0.017 dmean 0.001
+[GATE] control-20260706-0.png: dslope 0.001 dkurt -24.410 dshadow 0.000 dmean 0.009
+[GATE] control-20260706-1.png: dslope 0.007 dkurt -0.105 dshadow 0.001 dmean -0.002
+[GATE] control-20260706-2.png: dslope 0.365 dkurt 20.191 dshadow -0.009 dmean -0.000
+[GATE] control-20260706-3.png: dslope -0.231 dkurt -7.899 dshadow 0.001 dmean 0.002
+[GATE] control-20260706-4.png: dslope -0.010 dkurt -10.057 dshadow -0.007 dmean 0.032
+[GATE] control-20260706-5.png: dslope -0.087 dkurt -24.912 dshadow 0.000 dmean -0.010
+[GATE] control-20260706-6.png: dslope 0.058 dkurt -32.112 dshadow -0.003 dmean 0.002
+[GATE] control-20260706-7.png: dslope 0.004 dkurt -0.153 dshadow 0.000 dmean 0.000

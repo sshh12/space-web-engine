@@ -1,0 +1,34 @@
+{
+  "name": "image-to-procedural",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Template: AI image gen -> albedo + height map -> displaced 3D terrain -> headless screenshots.",
+  "scripts": {
+    "serve": "python -m http.server 8131",
+    "shots": "node screenshot.mjs http://localhost:8131/viewer.html shots",
+    "shots:planet": "node screenshot.mjs \"http://localhost:8131/planet.html?fast=1\" shots-planet",
+    "shots:critique": "node screenshot.mjs \"http://localhost:8131/planet.html?fast=1\" shots-critique test/critique-suite.json",
+    "bench": "node bench/run.mjs",
+    "bench:motion": "node bench/motion.mjs",
+    "cast": "node bench/casting.mjs",
+    "assets": "node scripts/assets.mjs",
+    "assets:check": "node scripts/assets.mjs --check",
+    "test": "node test/bake-test.mjs",
+    "test:contract": "node test/contract-test.mjs",
+    "test:global": "node test/global-test.mjs",
+    "test:reload": "node test/reload-test.mjs",
+    "test:rock": "node test/rock-test.mjs",
+    "test:strata": "node test/strata-test.mjs",
+    "test:tect": "node test/tect-test.mjs",
+    "test:climate": "node test/climate-test.mjs",
+    "test:mesh": "node test/mesh-test.mjs",
+    "test:cloud": "node test/cloud-test.mjs",
+    "test:figure": "node test/figure-test.mjs",
+    "test:ring": "node test/ring-test.mjs",
+    "test:cryo": "node test/cryo-test.mjs"
+  },
+  "dependencies": {
+    "puppeteer": "^23.0.0"
+  }
+}

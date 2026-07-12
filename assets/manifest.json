@@ -1,0 +1,243 @@
+{
+ "generator": "scripts/assets.mjs",
+ "runtime": "engine regenerates these from the same pure fns; this is the determinism contract",
+ "artifacts": {
+  "tellus": {
+   "rocks": {
+    "file": "tellus-rocks.bin",
+    "bytes": 1192672,
+    "sha256": "0619c25e0e63d87a759e967fae5c819e294cffac7fa54ddde1e15e7ff9f8e110",
+    "archetypes": 4,
+    "variants": 2,
+    "lods": 3,
+    "tris": 44160,
+    "hullLayers": 8
+   },
+   "rockmaps": {
+    "file": "tellus-rockmaps.bin",
+    "bytes": 524288,
+    "sha256": "fbecc17d53ea8ef97cf93ae63abb6453e9f26dcadd29faa50e91f38616eaa55b",
+    "size": 128,
+    "layers": 8
+   },
+   "forms": {
+    "file": "tellus-forms.bin",
+    "bytes": 705416,
+    "sha256": "3047318ffd67ac9d7ec4c1fed381184d1b4e2e8e8033f71a7c69616e25bfc199",
+    "archetypes": 3,
+    "variants": 2,
+    "lods": 3,
+    "tris": 30304,
+    "hullLayers": 6
+   },
+   "msLUT": {
+    "file": "tellus-msLUT.bin",
+    "bytes": 9216,
+    "sha256": "65c096cb9951f1e58b1e969513150065bb8986aa38b579f07f236a2e4cd4a9fb",
+    "floats": 2304
+   },
+   "disc": {
+    "file": "tellus-disc.bin",
+    "bytes": 131072,
+    "sha256": "0beff6c19cc0cb2b2af3e51e665f1277250ef174d6448df84351ac8562ad5fe9",
+    "w": 256,
+    "h": 128
+   }
+  },
+  "rubra": {
+   "rocks": {
+    "file": "rubra-rocks.bin",
+    "bytes": 3973456,
+    "sha256": "a24968183ad05618a8bc986d4edf81ee781f4f781b105f5e59eb3e83df073108",
+    "archetypes": 4,
+    "variants": 2,
+    "lods": 3,
+    "tris": 11040,
+    "hullLayers": 8
+   },
+   "rockmaps": {
+    "file": "rubra-rockmaps.bin",
+    "bytes": 524288,
+    "sha256": "a0cc68897da250fd141c3f6fcd720a4f246f46db4490d2e8452c3a6671ef63a3",
+    "size": 128,
+    "layers": 8
+   },
+   "forms": {
+    "file": "rubra-forms.bin",
+    "bytes": 705416,
+    "sha256": "56fad094525fafa3ec51b926c91f39ba035a3aac2752386dc0bd438940972142",
+    "archetypes": 3,
+    "variants": 2,
+    "lods": 3,
+    "tris": 30304,
+    "hullLayers": 6
+   },
+   "msLUT": {
+    "file": "rubra-msLUT.bin",
+    "bytes": 9216,
+    "sha256": "1700bd596d2f3328884612e3db8032bbb55c34667cff7cac061a093893b38711",
+    "floats": 2304
+   },
+   "disc": {
+    "file": "rubra-disc.bin",
+    "bytes": 131072,
+    "sha256": "1f95761adf9d85b9b0e0c5cbc63072aef308cde4a1e7c10f10f3c79dc62051fa",
+    "w": 256,
+    "h": 128
+   }
+  },
+  "luna": {
+   "rocks": {
+    "file": "luna-rocks.bin",
+    "bytes": 3973456,
+    "sha256": "494749ec6448aff182551dbee8fc39fc79dd2c9c253b50fb57cdddd0cf8e0bb3",
+    "archetypes": 4,
+    "variants": 2,
+    "lods": 3,
+    "tris": 11040,
+    "hullLayers": 8
+   },
+   "rockmaps": {
+    "file": "luna-rockmaps.bin",
+    "bytes": 524288,
+    "sha256": "3d1ba8a94d194eb565b95a3685dbfe6f6b7c8af99b681a741e87af921bc83cc5",
+    "size": 128,
+    "layers": 8
+   },
+   "disc": {
+    "file": "luna-disc.bin",
+    "bytes": 131072,
+    "sha256": "087a5109076e109d5cc8e40bb069c62500da6c53a7641189b8543b216523e4e6",
+    "w": 256,
+    "h": 128
+   }
+  },
+  "titan": {
+   "rocks": {
+    "file": "titan-rocks.bin",
+    "bytes": 1192672,
+    "sha256": "36b6764fa628091eb8a8d82e3aa2ff3dbe42bde2823c4012eccefd8f47fae8bc",
+    "archetypes": 4,
+    "variants": 2,
+    "lods": 3,
+    "tris": 44160,
+    "hullLayers": 8
+   },
+   "rockmaps": {
+    "file": "titan-rockmaps.bin",
+    "bytes": 524288,
+    "sha256": "20f4a310087c056bb3b285b9aecb9cd362180fae9fade7cde75ee02cc037a675",
+    "size": 128,
+    "layers": 8
+   },
+   "msLUT": {
+    "file": "titan-msLUT.bin",
+    "bytes": 9216,
+    "sha256": "f05989414f7d7520aa22b51535ad39b6d36389fb71878bff9df00ce5a8c678b2",
+    "floats": 2304
+   },
+   "disc": {
+    "file": "titan-disc.bin",
+    "bytes": 131072,
+    "sha256": "c2ea7c291dc92ac2ef8df2c12eb213865a08106c31317673e99e6fbc59f80079",
+    "w": 256,
+    "h": 128
+   }
+  },
+  "venus": {
+   "rocks": {
+    "file": "venus-rocks.bin",
+    "bytes": 3973456,
+    "sha256": "7f7dac6b1feffc0c5481ffbb374f13dc06e3c85a5d78041d237b72992b709311",
+    "archetypes": 4,
+    "variants": 2,
+    "lods": 3,
+    "tris": 11040,
+    "hullLayers": 8
+   },
+   "rockmaps": {
+    "file": "venus-rockmaps.bin",
+    "bytes": 524288,
+    "sha256": "6d95f3d242ec4f8a0ffe55cd178b9725bcebc3fd9b2fd0b64d3e616b6bb1a365",
+    "size": 128,
+    "layers": 8
+   },
+   "msLUT": {
+    "file": "venus-msLUT.bin",
+    "bytes": 9216,
+    "sha256": "98d5e8bacd01b4d8397e12d58c8f0c234dcda7599562e9f6de5a2a110160c382",
+    "floats": 2304
+   },
+   "disc": {
+    "file": "venus-disc.bin",
+    "bytes": 131072,
+    "sha256": "f7ea2068499316a696cebbcd6f4bff0e4cb20832ea7eaa739640ef49e42f0c61",
+    "w": 256,
+    "h": 128
+   }
+  },
+  "saturn": {
+   "disc": {
+    "file": "saturn-disc.bin",
+    "bytes": 131072,
+    "sha256": "5ec0d1a80960e542e43ab65435db22b49d41727b2477e714576235d60f1ece81",
+    "w": 256,
+    "h": 128
+   }
+  },
+  "vesta": {
+   "disc": {
+    "file": "vesta-disc.bin",
+    "bytes": 131072,
+    "sha256": "c074577440df2a4a082fbc5c5ac879758569a9db49410291b6e9cd4dca87ebdf",
+    "w": 256,
+    "h": 128
+   }
+  },
+  "haumea": {
+   "disc": {
+    "file": "haumea-disc.bin",
+    "bytes": 131072,
+    "sha256": "c535a82ed66fc3556c2d32fb2405edb1ad308832edaa2bad7c3d250f348d2fe4",
+    "w": 256,
+    "h": 128
+   }
+  },
+  "arrokoth": {
+   "disc": {
+    "file": "arrokoth-disc.bin",
+    "bytes": 131072,
+    "sha256": "759f417100415663b2e6b0a687fb2897e47b46a23987bb11ef0d27fb010fbf4e",
+    "w": 256,
+    "h": 128
+   }
+  },
+  "europa": {
+   "disc": {
+    "file": "europa-disc.bin",
+    "bytes": 131072,
+    "sha256": "40cf199fde3f5c95a8ffe07c53416a3e408b167ab95003ccfa05d3bc3841eaa3",
+    "w": 256,
+    "h": 128
+   }
+  },
+  "pluto": {
+   "disc": {
+    "file": "pluto-disc.bin",
+    "bytes": 131072,
+    "sha256": "21967c3cca264494a5f579850fd9351b0346b15404757ade80fa18e41c6040b2",
+    "w": 256,
+    "h": 128
+   }
+  },
+  "shared": {
+   "matstack": {
+    "file": "shared-matstack.bin",
+    "bytes": 262144,
+    "sha256": "eef7ec9bb9e86ab530c97ec494821fd585463ce53b75c28129b6c82717e1db0e",
+    "size": 128,
+    "layers": 4
+   }
+  }
+ }
+}

@@ -1,0 +1,6 @@
+[
+  { "name": "fr-tellus-disk-01", "clean": true, "body": "tellus", "lat": 16, "lon": -179, "alt": 24000000, "phaseDeg": 7 },
+  { "name": "fr-tellus-disk-02", "clean": true, "body": "tellus", "lat": 19, "lon": 116, "alt": 24000000, "phaseDeg": 7 },
+  { "name": "fr-luna-disk-01", "clean": true, "body": "luna", "lat": 2, "lon": 20, "alt": 5200000, "phaseDeg": 10 },
+  { "name": "fr-luna-disk-02", "clean": true, "body": "luna", "lat": -4, "lon": -95, "alt": 5200000, "phaseDeg": 12 }
+]

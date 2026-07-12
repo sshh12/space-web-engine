@@ -1,0 +1,10 @@
+node_modules/
+.env
+shots/
+shots-*/
+bench/out/
+__pycache__/
+*.pyc
+# generated asset blobs (re-derivable from the recipe); the manifest of hashes
+# is committed as the determinism contract — see scripts/assets.mjs
+assets/*.bin

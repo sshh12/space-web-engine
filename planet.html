@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="icon" href="data:,">
+<title>baked-tile planet renderer</title>
+<!--
+  Implementation of CONCEPT.md (see DESIGN.md for the map). Serve over http:
+      python -m http.server 8131   ->   http://localhost:8131/planet.html
+  Headless screenshots:
+      node screenshot.mjs "http://localhost:8131/planet.html?fast=1" shots-planet
+  URL params: ?fast=1 (fewer atmosphere steps, pixelRatio 1 — for headless/software GL)
+
+  Controls: drag = move over the surface - scroll = altitude - right/shift-drag = look
+-->
+<style>
+  html,body{margin:0;height:100%;background:#000;overflow:hidden;font:13px/1.4 system-ui,sans-serif;color:#e8e8ea}
+  #c{display:block;width:100vw;height:100vh}
+  #ui,#photo{position:fixed;top:12px;left:12px;background:#181820cc;backdrop-filter:blur(6px);border:1px solid #ffffff22;border-radius:10px;padding:12px 14px;min-width:250px;user-select:none}
+  #photo{left:auto;right:12px;min-width:210px;display:none}
+  #ui h1,#photo h1{margin:0 0 4px;font-size:13px;font-weight:600}
+  #ui .sub,#photo .sub{opacity:.55;font-size:11px;margin-bottom:8px}
+  #ui label,#photo label{display:flex;justify-content:space-between;gap:10px;align-items:center;margin:6px 0}
+  #ui input[type=range],#photo input[type=range]{flex:1}
+  #ui select{background:#2a2a3a;color:#e8e8ea;border:1px solid #ffffff22;border-radius:6px;padding:3px 6px;flex:1}
+  #photo button{background:#2a2a3a;color:#e8e8ea;border:1px solid #ffffff22;border-radius:6px;padding:4px 8px;cursor:pointer;font-size:12px}
+  #photo button:hover{background:#39394f}
+  #photo #pbookmark{width:100%;margin:6px 0 4px}
+  #photo .bmark{display:flex;gap:4px;margin:3px 0}
+  #photo .bmark button:first-child{flex:1;text-align:left;overflow:hidden;white-space:nowrap}
+  #photo .bx{width:26px;color:#ff9b9b}
+  #ui .modes{display:grid;grid-template-columns:repeat(4,1fr);gap:5px;margin:8px 0}
+  #ui .modes button{background:#2a2a3a;color:#e8e8ea;border:1px solid #ffffff22;border-radius:6px;padding:4px 2px;cursor:pointer;font-size:11px}
+  #ui .modes button:hover{background:#39394f}
+  #ui .modes button.active{background:#4a5adf;border-color:#7f8cff}
+  #ui .checks{display:grid;grid-template-columns:repeat(3,auto);gap:4px 10px;margin:6px 0}
+  #ui .checks label{margin:0;justify-content:flex-start;gap:5px;font-size:12px}
+  #ui .val{opacity:.75;min-width:34px;text-align:right;font-variant-numeric:tabular-nums}
+  #hud{position:fixed;bottom:12px;left:12px;opacity:.65;font-size:11px;background:#00000088;padding:4px 8px;border-radius:6px;font-variant-numeric:tabular-nums}
+  #hint{position:fixed;bottom:12px;right:12px;opacity:.4;font-size:11px;text-align:right}
+  #insetframe{position:fixed;right:12px;bottom:12px;width:30vw;aspect-ratio:1/0.62;border:1px solid #ffffff55;border-radius:4px;pointer-events:none;display:none}
+  #insetframe::after{content:"eye level (1.7 m)";position:absolute;top:4px;left:6px;font-size:10px;opacity:.7;text-shadow:0 1px 2px #000}
+  #err{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);color:#ff9b9b;max-width:70ch;text-align:center;white-space:pre-wrap;display:none;background:#000c;padding:16px;border-radius:8px}
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<div id="ui">
+  <h1>baked-tile planet renderer</h1>
+  <div class="sub">one deterministic function of (body, position, time)</div>
+  <!-- options populated from SYSTEM.bodies in main.js bindUI() — recipe list is the single source of truth -->
+  <label>Body <select id="body"></select></label>
+  <div class="modes">
+    <button id="mode-lit">lit</button>
+    <button id="mode-albedo">albedo</button>
+    <button id="mode-normals">normals</button>
+    <button id="mode-height">height</button>
+    <button id="mode-slope">slope</button>
+    <button id="mode-ao">AO</button>
+    <button id="mode-lod">LOD</button>
+    <button id="mode-shadow">shadow</button>
+  </div>
+  <div class="checks">
+    <label><input type="checkbox" id="wire">wire</label>
+    <label><input type="checkbox" id="debris" checked>debris</label>
+    <label><input type="checkbox" id="inset">eye level</label>
+  </div>
+  <label>Time <input id="tday" type="range" min="0" max="1" step="0.0005" value="0.5"></label>
+  <label>Season <input id="season" type="range" min="0" max="1" step="0.002" value="0.15"></label>
+  <label>Speed <select id="speed">
+    <option value="0">paused</option>
+    <option value="1">1×</option>
+    <option value="60" selected>60×</option>
+    <option value="1800">1800×</option>
+    <option value="43200">43200×</option>
+  </select></label>
+  <label>EV± <input id="ev" type="range" min="-4" max="4" step="0.1" value="0"><span class="val" id="evv">0.0</span></label>
+</div>
+<div id="photo">
+  <h1>photo mode</h1>
+  <div class="sub">P toggle · F9 hi-res capture</div>
+  <label><input type="checkbox" id="pfree">free look (zenith · roll)</label>
+  <label>FOV <input id="pfov" type="range" min="12" max="90" step="1" value="55"><span class="val" id="pfovv">55</span></label>
+  <label>WB <input id="pwb" type="range" min="-1" max="1" step="0.05" value="0"><span class="val" id="pwbv">0.00</span></label>
+  <label>Grade <input id="pgrade" type="range" min="0" max="1" step="0.05" value="0"><span class="val" id="pgradev">0.00</span></label>
+  <button id="pbookmark">★ save view</button>
+  <button id="pplay" style="width:100%;margin-bottom:4px">▶ play path (tween bookmarks)</button>
+  <div id="pbooks"></div>
+</div>
+<div id="hud">loading…</div>
+<div id="hint">drag = move · scroll = altitude · right-drag = look · P = photo</div>
+<div id="insetframe"></div>
+<div id="err"></div>
+
+<script>
+  // __pageErrors: the bench/screenshot harness reads this and FAILS the scene
+  // loudly — a metrics outlier can be the renderer dying (round-4 OOM), not
+  // the scene changing, and a still with an error banner must never be scored
+  window.__pageErrors = [];
+  addEventListener('error', (e) => {
+    const el = document.getElementById('err');
+    el.style.display = 'block';
+    el.textContent = 'Error: ' + (e.message || e.reason) + '\n' + (e.filename || '') + ':' + (e.lineno || '');
+    window.__pageErrors.push(String(e.message || e.reason));
+  });
+  addEventListener('unhandledrejection', (e) => {
+    const el = document.getElementById('err');
+    el.style.display = 'block';
+    el.textContent = 'Rejection: ' + (e.reason && (e.reason.stack || e.reason.message || e.reason));
+    window.__pageErrors.push('rejection: ' + (e.reason && (e.reason.message || e.reason)));
+  });
+</script>
+<script type="importmap">
+{ "imports": {
+  "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+  "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+}}
+</script>
+<script type="module" src="./src/main.js"></script>
+</body>
+</html>

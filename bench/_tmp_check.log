@@ -1,0 +1,14 @@
+file:///C:/dev/planet-render/node_modules/puppeteer-core/lib/esm/puppeteer/util/Deferred.js:57
+            this.#timeoutError = new TimeoutError(opts.message);
+                                 ^
+
+TimeoutError: Navigation timeout of 120000 ms exceeded
+    at new Deferred (file:///C:/dev/planet-render/node_modules/puppeteer-core/lib/esm/puppeteer/util/Deferred.js:57:34)
+    at Deferred.create (file:///C:/dev/planet-render/node_modules/puppeteer-core/lib/esm/puppeteer/util/Deferred.js:18:16)
+    at new LifecycleWatcher (file:///C:/dev/planet-render/node_modules/puppeteer-core/lib/esm/puppeteer/cdp/LifecycleWatcher.js:66:46)
+    at CdpFrame.goto (file:///C:/dev/planet-render/node_modules/puppeteer-core/lib/esm/puppeteer/cdp/Frame.js:146:29)
+    at CdpFrame.<anonymous> (file:///C:/dev/planet-render/node_modules/puppeteer-core/lib/esm/puppeteer/util/decorators.js:101:27)
+    at CdpPage.goto (file:///C:/dev/planet-render/node_modules/puppeteer-core/lib/esm/puppeteer/api/Page.js:570:43)
+    at file:///C:/dev/planet-render/bench/_tmp_check.mjs:19:12
+
+Node.js v24.16.0
