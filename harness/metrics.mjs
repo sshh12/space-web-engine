@@ -19,6 +19,7 @@
 import { readPNG, luminance } from './png.mjs';
 import { readdirSync, statSync, writeFileSync } from 'node:fs';
 import { resolve, basename } from 'node:path';
+import { pathToFileURL } from 'node:url';
 
 // ---------------- FFT (iterative radix-2, in-place) ----------------
 function fft(re, im, inv = false) {
@@ -237,13 +238,46 @@ export function metricsFor(path, tags = {}) {
   return m;
 }
 
+// Sequence metrics — pure, absorbed from the old motion.mjs so a motion run is just
+// `renderShots` over a Situation timeline + this scorer (no sibling driver). `lums` is
+// an array of { lum, W, H } (one per frame, in order); returns pop/flicker statistics.
+//   pop_p99      — p99 of adjacent-frame per-pixel luminance steps (settle/advection pops)
+//   flicker_energy — mean per-pixel temporal variance over a FIXED camera (shimmer)
+export function sequenceMetrics(lums, opts = {}) {
+  const { center = false, flicker = false } = opts;
+  const steps = [];
+  for (let i = 1; i < lums.length; i++) {
+    const a = lums[i - 1], b = lums[i];
+    const x0 = center ? (a.W * 0.3) | 0 : 0, x1 = center ? (a.W * 0.7) | 0 : a.W;
+    const y0 = center ? (a.H * 0.3) | 0 : 0, y1 = center ? (a.H * 0.7) | 0 : a.H;
+    const d = [];
+    for (let y = y0; y < y1; y += 2)
+      for (let x = x0; x < x1; x += 2) d.push(Math.abs(a.lum[y * a.W + x] - b.lum[y * b.W + x]));
+    d.sort((p, q) => p - q);
+    steps.push(d[Math.floor(d.length * 0.99)]);
+  }
+  steps.sort((p, q) => p - q);
+  const r = { pop_p99: +(steps[Math.floor(steps.length * 0.99)] ?? 0).toFixed(4), frames: lums.length };
+  if (flicker && lums.length) {
+    let sum = 0, n = 0;
+    const T = lums.length, base = lums[0];
+    for (let px = 0; px < base.lum.length; px += 4) {
+      let m = 0, m2 = 0;
+      for (let t = 0; t < T; t++) { const v = lums[t].lum[px]; m += v; m2 += v * v; }
+      m /= T; sum += m2 / T - m * m; n++;
+    }
+    r.flicker_energy = +(sum / n).toFixed(6);
+  }
+  return r;
+}
+
 // ---------------- CLI ----------------
-if (import.meta.url === `file://${process.argv[1].replace(/\\/g, '/')}`) {
+if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
   const args = process.argv.slice(2);
   const oi = args.indexOf('-o');
   const out = oi >= 0 ? args.splice(oi, 2)[1] : null;
   const files = [];
-  for (const a of args.length ? args : ['bench/out/stills']) {
+  for (const a of args.length ? args : ['harness/out/stills']) {
     const p = resolve(a);
     if (statSync(p).isDirectory()) {
       for (const f of readdirSync(p)) if (f.endsWith('.png')) files.push(resolve(p, f));
