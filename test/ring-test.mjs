@@ -2,7 +2,7 @@
 // so this pins the ALGORITHM (the precision factoring, the ring-normal choice,
 // the mutual-shadow geometry, the HG lobe, the gap profile) in JS against a
 // double-precision reference, plus the pure-data §11 consistency + the M5 asserts.
-import { SYSTEM, bodyById, assertGiantRecipe, assertRingRecipe, assertGiantSystem } from '../src/recipe.js';
+import { SYSTEM, bodyById, assertGiantRecipe, assertRingRecipe, assertGiantSystem } from '../src/core/recipe.js';
 
 let pass = 0, fail = 0;
 const ok = (c, name) => { if (c) { pass++; } else { fail++; console.log('FAIL ', name); } };

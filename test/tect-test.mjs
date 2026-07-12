@@ -8,9 +8,9 @@ import {
   makeBaker, TILE_RES, HALO, I,
   lowDegreeAxes, edificeSites, forEachBasin, stressSources, stressTensor,
   riftFrame, riftDepthAt,
-} from '../src/bakecore.js';
-import { bodyById } from '../src/recipe.js';
-import { dirToFaceUv } from '../src/mathx.js';
+} from '../src/core/bakecore.js';
+import { bodyById } from '../src/core/recipe.js';
+import { dirToFaceUv } from '../src/core/mathx.js';
 
 let failures = 0;
 const check = (name, ok, detail = '') => {
@@ -329,7 +329,7 @@ const maxAbsDelta = (A, B) => {
 
 // ---- 5. wind field invariants (the [global] extension) ----
 {
-  const { buildGlobal, clearGlobalCache } = await import('../src/globalgrid.js');
+  const { buildGlobal, clearGlobalCache } = await import('../src/core/globalgrid.js');
   const gp = rubra.processes.find((q) => q.type === 'global');
   clearGlobalCache();
   const g1 = buildGlobal({ ...rubra }, { ...gp, debug: true });

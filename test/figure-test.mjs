@@ -3,13 +3,13 @@
 // per-cell metric sanity, the relief-budget measurement, and determinism.
 // Pure Node, no mocks — imports the same modules the worker and main thread run.
 
-import { makeBaker, TILE_RES, HALO, I } from '../src/bakecore.js';
-import { SYSTEM, bodyById, assertFigureRecipe } from '../src/recipe.js';
+import { makeBaker, TILE_RES, HALO, I } from '../src/core/bakecore.js';
+import { SYSTEM, bodyById, assertFigureRecipe } from '../src/core/recipe.js';
 import {
   figOf, figS, figAlt, figUp, figRadial, figMapDir, figNormalDir,
   assertStarShaped, figPreflight, figInjectivity, bodyBoundR, bodyEffR,
-} from '../src/figure.js';
-import { faceUvToDir, dirToFaceUv } from '../src/mathx.js';
+} from '../src/core/figure.js';
+import { faceUvToDir, dirToFaceUv } from '../src/core/mathx.js';
 
 let passed = 0, failed = 0;
 function ok(cond, name) {

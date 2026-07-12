@@ -3,9 +3,9 @@
 // pins the MECHANISM laws that harness can't see: lineae/tholin albedo arrive
 // WHOLE (no onset ramp), glacier ice PERSISTS past context, the tholin longitude
 // province, the §11 disc↔ground mirror, and legacy byte-cleanliness of the fields.
-import { makeBaker, bakeDiscMap, sampleTileField, sampleTileHeight } from '../src/bakecore.js';
-import { dirToFaceUv } from '../src/mathx.js';
-import { bodyById } from '../src/recipe.js';
+import { makeBaker, bakeDiscMap, sampleTileField, sampleTileHeight } from '../src/core/bakecore.js';
+import { dirToFaceUv } from '../src/core/mathx.js';
+import { bodyById } from '../src/core/recipe.js';
 
 let pass = 0, fail = 0;
 const ok = (c, name) => { if (c) { pass++; } else { fail++; console.log('FAIL ', name); } };

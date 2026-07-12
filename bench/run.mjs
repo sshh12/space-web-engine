@@ -79,8 +79,8 @@ if (!NO_CONTROLS && !FILTER) {
   // their deltas are EXPECTED and adjudicated individually; the rest gate at
   // ~0 as usual. Closed-form (forEachBasin), decided BEFORE the run, never
   // from the metrics (the silent-caps rule).
-  const { forEachBasin } = await import('../src/bakecore.js');
-  const { bodyById } = await import('../src/recipe.js');
+  const { forEachBasin } = await import('../src/core/bakecore.js');
+  const { bodyById } = await import('../src/core/recipe.js');
   const lunaBasins = [];
   forEachBasin(bodyById('luna'), (b) => { if (b.fill > 0.05) lunaBasins.push(b); });
   // round 15 (panel F1-bench/M2): clouds move Tellus/Rubra content — but the
@@ -88,8 +88,8 @@ if (!NO_CONTROLS && !FILTER) {
   // a control is expected-delta ONLY if the coverage field actually reaches
   // its view footprint at the scene's own t. A clear-sky pose gates at ~0
   // exactly like Luna. Never from the metrics.
-  const { makeCloudKeyframes, cloudCovJS, cloudKeyOf } = await import('../src/cloudcore.js');
-  const { globalFor } = await import('../src/globalgrid.js');
+  const { makeCloudKeyframes, cloudCovJS, cloudKeyOf } = await import('../src/core/cloudcore.js');
+  const { globalFor } = await import('../src/core/globalgrid.js');
   const kfCache = new Map();
   const cloudKfFor = (body, k) => {
     const key = body.id + ':' + k;
@@ -136,7 +136,7 @@ if (!NO_CONTROLS && !FILTER) {
   // per-POSE, closed-form, BEFORE the run (the M5 silent-caps rule), never from the
   // metrics. Over-tagging (marking a control expected-delta it might not show) is
   // SAFE; under-tagging (missing a real delta) is the failure the panel guards.
-  const { ephemeris } = await import('../src/frames.js');
+  const { ephemeris } = await import('../src/core/frames.js');
   const R15_BODIES = new Set(['tellus', 'rubra', 'luna']);
   const tOfControl = (body, spec) => 0.15 * body.orbit.periodDays * 86400 + spec.tday * body.spin.periodH * 3600;
   const dirOf = (spec) => {

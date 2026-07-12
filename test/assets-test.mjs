@@ -9,12 +9,12 @@
 // loader.) When cache/ becomes JIT (recipeHash, bodyId) blobs, this is the guard that
 // a cache hit is always byte-equal to a fresh miss.
 import { createHash } from 'node:crypto';
-import { SYSTEM } from '../src/recipe.js';
-import { makeRockSet, makeRockMaps } from '../src/rockcore.js';
-import { makeFormationSet } from '../src/meshcore.js';
-import { makeMaterialMaps } from '../src/matstack.js';
-import { buildMsLUT } from '../src/atmolut.js';
-import { makeBaker, bakeDiscMap } from '../src/bakecore.js';
+import { SYSTEM } from '../src/core/recipe.js';
+import { makeRockSet, makeRockMaps } from '../src/core/rockcore.js';
+import { makeFormationSet } from '../src/core/meshcore.js';
+import { makeMaterialMaps } from '../src/core/matstack.js';
+import { buildMsLUT } from '../src/core/atmolut.js';
+import { makeBaker, bakeDiscMap } from '../src/core/bakecore.js';
 
 let pass = 0, fail = 0;
 const ok = (c, m) => { if (c) { pass++; console.log('PASS  ' + m); } else { fail++; console.log('FAIL  ' + m); } };

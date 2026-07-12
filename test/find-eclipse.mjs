@@ -2,8 +2,8 @@
 //   solar (Luna's shadow dot crossing Tellus) and lunar (Tellus's umbra on Luna).
 // Prints season/tday + sub-occluder lon/lat to pose bench scenes. Deterministic —
 // the same scan two machines run finds the same eclipse.
-import { SYSTEM, bodyById } from '../src/recipe.js';
-import { ephemeris } from '../src/frames.js';
+import { SYSTEM, bodyById } from '../src/core/recipe.js';
+import { ephemeris } from '../src/core/frames.js';
 
 const tellus = bodyById('tellus');
 const luna = bodyById('luna');

@@ -13,9 +13,9 @@
 //      while airless-Luna highlands (mare-gated) stay untouched
 // run: node test/strata-test.mjs
 
-import { makeBaker, TILE_RES, I } from '../src/bakecore.js';
-import { bodyById } from '../src/recipe.js';
-import { smoothstep } from '../src/mathx.js';
+import { makeBaker, TILE_RES, I } from '../src/core/bakecore.js';
+import { bodyById } from '../src/core/recipe.js';
+import { smoothstep } from '../src/core/mathx.js';
 
 let failures = 0;
 const check = (name, ok, detail = '') => {

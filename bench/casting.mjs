@@ -14,7 +14,7 @@
 import puppeteer from 'puppeteer';
 import { mkdirSync, writeFileSync } from 'node:fs';
 import { resolve } from 'node:path';
-import { bodyById } from '../src/recipe.js';
+import { bodyById } from '../src/core/recipe.js';
 
 const args = process.argv.slice(2);
 const opt = (name, dflt) => { const i = args.indexOf(name); return i >= 0 && args[i + 1] ? args[i + 1] : dflt; };
@@ -29,7 +29,7 @@ if (!body) { console.error(`unknown body '${BODY}'`); process.exit(1); }
 // round 17: disc/limb framing keys on the figure's bounding extent — a
 // triaxial/bilobate body framed at mean-R multiples would clip its long axis
 // (bodyBoundR === body.R for every legacy body)
-const { bodyBoundR } = await import('../src/figure.js');
+const { bodyBoundR } = await import('../src/core/figure.js');
 const R = bodyBoundR(body);
 const c = body.camera;
 

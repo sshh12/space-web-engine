@@ -9,10 +9,10 @@
 //   5. scatter LOD-independence (§7): rocks from tiles at different levels covering
 //      the same region are the same rocks
 
-import { makeBaker, TILE_RES, HALO, I, RASTER } from '../src/bakecore.js';
-import { listRocks } from '../src/scattercore.js';
-import { bodyById } from '../src/recipe.js';
-import { faceUvToDir, dirToFaceUv } from '../src/mathx.js';
+import { makeBaker, TILE_RES, HALO, I, RASTER } from '../src/core/bakecore.js';
+import { listRocks } from '../src/core/scattercore.js';
+import { bodyById } from '../src/core/recipe.js';
+import { faceUvToDir, dirToFaceUv } from '../src/core/mathx.js';
 
 let failures = 0;
 const check = (name, ok, detail = '') => {

@@ -4,18 +4,18 @@
 // same scene, same integral, different endpoint (§8's whole point).
 
 import * as THREE from 'three';
-import { SYSTEM, bodyById, assertPaletteRecipe, assertFigureRecipe, assertGiantRecipe, assertRingRecipe, assertGiantSystem, assertRingSystem } from './recipe.js';
+import { SYSTEM, bodyById, assertPaletteRecipe, assertFigureRecipe, assertGiantRecipe, assertRingRecipe, assertGiantSystem, assertRingSystem } from './core/recipe.js';
 // round 17 (§11 figure generality): recipe-declared reference shapes
-import { figOf, figPreflight, figRadial, bodyBoundR, bodyEffR } from './figure.js';
-import { ephemeris, bodyToInertial, mulMM, transpose } from './frames.js';
-import { PlanetTiles } from './tiles.js';
-import { OrbitalCamera } from './camera.js';
-import { withCommon, SKY_VERT, SKY_FRAG, SCATTER_FOR_STARS, POST_VERT, POST_FRAG, BLOOM_DOWN_FRAG, BLOOM_UP_FRAG, DEPTH_VERT, DEPTH_FRAG } from './shaders.js';
-import { makeStarPoints } from './stars.js';
-import { skyAmbient, msSample } from './atmo.js';
-import { buildMsLUT, annulusTint } from './atmolut.js';
-import { clamp, vcross, vnorm } from './mathx.js';
-import { cloudKeyOf, driftPhase, alphaMeanLit, assertCloudRecipe, cloudCovJS, cloudShadeJS, CLOUD_W, CLOUD_H, MAX_DECKS } from './cloudcore.js';
+import { figOf, figPreflight, figRadial, bodyBoundR, bodyEffR } from './core/figure.js';
+import { ephemeris, bodyToInertial, mulMM, transpose } from './core/frames.js';
+import { PlanetTiles } from './render/tiles.js';
+import { OrbitalCamera } from './render/camera.js';
+import { withCommon, SKY_VERT, SKY_FRAG, SCATTER_FOR_STARS, POST_VERT, POST_FRAG, BLOOM_DOWN_FRAG, BLOOM_UP_FRAG, DEPTH_VERT, DEPTH_FRAG } from './render/shaders.js';
+import { makeStarPoints } from './render/stars.js';
+import { skyAmbient, msSample } from './core/atmo.js';
+import { buildMsLUT, annulusTint } from './core/atmolut.js';
+import { clamp, vcross, vnorm } from './core/mathx.js';
+import { cloudKeyOf, driftPhase, alphaMeanLit, assertCloudRecipe, cloudCovJS, cloudShadeJS, CLOUD_W, CLOUD_H, MAX_DECKS } from './core/cloudcore.js';
 
 const q = new URL(location.href).searchParams;
 const FAST = q.get('fast') === '1';

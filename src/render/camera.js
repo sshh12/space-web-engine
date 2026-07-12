@@ -4,10 +4,10 @@
 // object itself always renders from the origin — main.js sets mesh offsets.
 
 import * as THREE from 'three';
-import { clamp } from './mathx.js';
+import { clamp } from '../core/mathx.js';
 // round 17 (§11 figure generality): position/up derive from the recipe's
 // reference shape when one is declared; sphere bodies keep the old arithmetic
-import { figOf, figMapDir, figUp, figAnchorR } from './figure.js';
+import { figOf, figMapDir, figUp, figAnchorR } from '../core/figure.js';
 
 export class OrbitalCamera {
   constructor(dom, body, heightAt) {

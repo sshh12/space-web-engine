@@ -14,11 +14,11 @@
 //
 // Three-free, pure Node.
 
-import { decimateChain, makeFormationSet, makeHullMaps, FORM_ARCHETYPES, FORM_VARIANTS, FORM_LOD_TRIS } from '../src/meshcore.js';
-import { makeRockSet, ARCHETYPES, VARIANTS, LOD_TRIS } from '../src/rockcore.js';
-import { listRocks, listFormations } from '../src/scattercore.js';
-import { makeBaker } from '../src/bakecore.js';
-import { bodyById } from '../src/recipe.js';
+import { decimateChain, makeFormationSet, makeHullMaps, FORM_ARCHETYPES, FORM_VARIANTS, FORM_LOD_TRIS } from '../src/core/meshcore.js';
+import { makeRockSet, ARCHETYPES, VARIANTS, LOD_TRIS } from '../src/core/rockcore.js';
+import { listRocks, listFormations } from '../src/core/scattercore.js';
+import { makeBaker } from '../src/core/bakecore.js';
+import { bodyById } from '../src/core/recipe.js';
 
 let failures = 0;
 const check = (name, ok, detail = '') => {

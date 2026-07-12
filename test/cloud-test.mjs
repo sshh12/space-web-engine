@@ -10,16 +10,16 @@
 //   - schema: deck list, detailAmp <= 1 enforced, Luna structural null
 //   - the drift/lon-wrap/rollover continuity of the JS twin samplers
 // Run: npm run test:cloud
-import { bodyById } from '../src/recipe.js';
+import { bodyById } from '../src/core/recipe.js';
 import {
   makeCloudKeyframes, covAt, typeAt, texelDir, sampleCloud, cloudCovJS,
   cloudShadeJS, alphaMeanLit, discAlpha, assertCloudRecipe, cloudKeyOf,
   driftPhase, driftDir, profileh, profileH, columnMean, zonalCloud,
   moistPrior, keyframeSec, stormEnvelope, CLOUD_W, CLOUD_H, MAX_DECKS,
-} from '../src/cloudcore.js';
-import { globalFor } from '../src/globalgrid.js';
-import { ephemeris } from '../src/frames.js';
-import { latOf } from '../src/mathx.js';
+} from '../src/core/cloudcore.js';
+import { globalFor } from '../src/core/globalgrid.js';
+import { ephemeris } from '../src/core/frames.js';
+import { latOf } from '../src/core/mathx.js';
 
 let pass = 0, fail = 0;
 const ok = (cond, name, detail = '') => {

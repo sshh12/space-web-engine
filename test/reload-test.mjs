@@ -9,8 +9,8 @@
 //   3. a tile inside the changed band actually rebakes to the new content
 //   4. the rebake matches a from-scratch NEW-recipe baker (deterministic)
 
-import { makeBaker, invalidationLevel, TILE_RES, I } from '../src/bakecore.js';
-import { bodyById } from '../src/recipe.js';
+import { makeBaker, invalidationLevel, TILE_RES, I } from '../src/core/bakecore.js';
+import { bodyById } from '../src/core/recipe.js';
 
 let failures = 0;
 const check = (name, ok, detail = '') => {

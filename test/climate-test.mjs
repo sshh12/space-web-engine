@@ -5,10 +5,10 @@
 // (the terrain deflection moves the rain field) yet stays deterministic.
 // Run: npm run test:climate
 
-import { makeBaker, TILE_RES, I } from '../src/bakecore.js';
-import { buildGlobal, clearGlobalCache } from '../src/globalgrid.js';
-import { bodyById } from '../src/recipe.js';
-import { dirToFaceUv } from '../src/mathx.js';
+import { makeBaker, TILE_RES, I } from '../src/core/bakecore.js';
+import { buildGlobal, clearGlobalCache } from '../src/core/globalgrid.js';
+import { bodyById } from '../src/core/recipe.js';
+import { dirToFaceUv } from '../src/core/mathx.js';
 
 let failures = 0;
 const check = (name, ok, detail = '') => {

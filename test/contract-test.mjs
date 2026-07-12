@@ -15,9 +15,9 @@
 //
 // Runtime is bounded: one east-neighbour pair + one cube-edge probe per prefix.
 
-import { makeBaker, TILE_RES, I } from '../src/bakecore.js';
-import { SYSTEM } from '../src/recipe.js';
-import { faceUvToDir, dirToFaceUv } from '../src/mathx.js';
+import { makeBaker, TILE_RES, I } from '../src/core/bakecore.js';
+import { SYSTEM } from '../src/core/recipe.js';
+import { faceUvToDir, dirToFaceUv } from '../src/core/mathx.js';
 
 let failures = 0;
 const check = (name, ok, detail = '') => {

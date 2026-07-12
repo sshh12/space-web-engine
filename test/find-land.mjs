@@ -1,8 +1,8 @@
 // find-land.mjs — dev helper: scan the deterministic baker for interesting ground-
 // shot locations (land, relief) without opening a browser. node test/find-land.mjs
-import { makeBaker, TILE_RES, I, sampleTileHeight } from '../src/bakecore.js';
-import { bodyById } from '../src/recipe.js';
-import { dirToFaceUv } from '../src/mathx.js';
+import { makeBaker, TILE_RES, I, sampleTileHeight } from '../src/core/bakecore.js';
+import { bodyById } from '../src/core/recipe.js';
+import { dirToFaceUv } from '../src/core/mathx.js';
 
 const body = bodyById(process.argv[2] || 'tellus');
 const baker = makeBaker(body);

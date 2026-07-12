@@ -7,12 +7,12 @@
 // 'hgt' is the height raster itself (per-pixel bathymetry for the ocean).
 // Also answers { type:'discmap', bodyId } with the §11 equirect disc albedo map.
 
-import { makeBaker, bakeDiscMap, invalidationLevel, RASTER, ATLAS } from './bakecore.js';
-import { bodyById } from './recipe.js';
-import { floatToHalf } from './mathx.js';
-import { makeCloudKeyframes, keyframeSec } from './cloudcore.js';
-import { ephemeris } from './frames.js';
-import { globalFor } from './globalgrid.js';
+import { makeBaker, bakeDiscMap, invalidationLevel, RASTER, ATLAS } from './core/bakecore.js';
+import { bodyById } from './core/recipe.js';
+import { floatToHalf } from './core/mathx.js';
+import { makeCloudKeyframes, keyframeSec } from './core/cloudcore.js';
+import { ephemeris } from './core/frames.js';
+import { globalFor } from './core/globalgrid.js';
 
 const TAU = Math.PI * 2;
 

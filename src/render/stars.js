@@ -10,7 +10,7 @@
 // negligible error under a bright one (trans·flux is stops below the sky then).
 
 import * as THREE from 'three';
-import { rand01 } from './mathx.js';
+import { rand01 } from '../core/mathx.js';
 
 // galactic frame for the synthetic sky (fictional system — arbitrary but fixed)
 export const GAL_POLE = new THREE.Vector3(0.35, 0.80, 0.487).normalize();

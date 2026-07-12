@@ -21,12 +21,12 @@ import { createHash } from 'node:crypto';
 import { mkdirSync, writeFileSync, readFileSync, existsSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { SYSTEM } from '../src/recipe.js';
-import { makeRockSet, makeRockMaps } from '../src/rockcore.js';
-import { makeFormationSet } from '../src/meshcore.js';
-import { makeMaterialMaps } from '../src/matstack.js';
-import { buildMsLUT } from '../src/atmolut.js';
-import { makeBaker, bakeDiscMap } from '../src/bakecore.js';
+import { SYSTEM } from '../src/core/recipe.js';
+import { makeRockSet, makeRockMaps } from '../src/core/rockcore.js';
+import { makeFormationSet } from '../src/core/meshcore.js';
+import { makeMaterialMaps } from '../src/core/matstack.js';
+import { buildMsLUT } from '../src/core/atmolut.js';
+import { makeBaker, bakeDiscMap } from '../src/core/bakecore.js';
 
 const ROOT = resolve(fileURLToPath(import.meta.url), '../..');
 const OUT = resolve(ROOT, 'cache');

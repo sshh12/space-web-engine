@@ -8,9 +8,9 @@
 //   5. prefix contract: the grid ignores processes AFTER the global entry
 //      (routing is defined on the pre-incision surface — the circularity break)
 
-import { buildGlobal } from '../src/globalgrid.js';
-import { bodyById } from '../src/recipe.js';
-import { faceUvToDir } from '../src/mathx.js';
+import { buildGlobal } from '../src/core/globalgrid.js';
+import { bodyById } from '../src/core/recipe.js';
+import { faceUvToDir } from '../src/core/mathx.js';
 
 let failures = 0;
 const check = (name, ok, detail = '') => {

@@ -6,21 +6,21 @@
 // while the camera sits at the origin — no system-scale coordinate touches float32.
 
 import * as THREE from 'three';
-import { TILE_RES, HALO, RASTER, I, ATLAS, sampleTileHeight, lowDegreeAxes } from './bakecore.js';
-import { faceUvToDir, dirToFaceUv, clamp, rand01, FACES, halfToFloat } from './mathx.js';
+import { TILE_RES, HALO, RASTER, I, ATLAS, sampleTileHeight, lowDegreeAxes } from '../core/bakecore.js';
+import { faceUvToDir, dirToFaceUv, clamp, rand01, FACES, halfToFloat } from '../core/mathx.js';
 // round 17 (§11 figure generality): q(d̂) + (h+meso)·m̂ replaces d̂·(R+h+meso)
 // when the recipe declares a figure; legacy bodies take the old arithmetic
 // verbatim (this.fig === null gates every branch — the byte-identity law)
-import { figOf, figRadial, figUp, figMapDir, figAnchorR, figAlt } from './figure.js';
+import { figOf, figRadial, figUp, figMapDir, figAnchorR, figAlt } from '../core/figure.js';
 import {
   withCommon, TERRAIN_VERT, TERRAIN_FRAG, OCEAN_VERT, OCEAN_FRAG,
   WIRE_VERT, WIRE_FRAG, ROCK_VERT, ROCK_FRAG, IMPOSTOR_VERT, IMPOSTOR_FRAG,
   FORM_VERT, FORM_FRAG,
 } from './shaders.js';
-import { placeRocks, placeFormations, anyFormationCandidate, mesoDisp, mesoDispRamped, mesoRamp } from './scattercore.js';
-import { makeRockSet, makeRockMaps, lodForLevel, VARIANTS } from './rockcore.js';
-import { makeFormationSet, FORM_VARIANTS } from './meshcore.js';
-import { makeMaterialMaps } from './matstack.js';
+import { placeRocks, placeFormations, anyFormationCandidate, mesoDisp, mesoDispRamped, mesoRamp } from '../core/scattercore.js';
+import { makeRockSet, makeRockMaps, lodForLevel, VARIANTS } from '../core/rockcore.js';
+import { makeFormationSet, FORM_VARIANTS } from '../core/meshcore.js';
+import { makeMaterialMaps } from '../core/matstack.js';
 
 // Material texture stacks v2 (round 10, §7 amplification). Body-independent (the
 // four archetypes are fixed), so it is built once and shared by every body's

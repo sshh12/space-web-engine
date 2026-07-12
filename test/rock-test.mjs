@@ -11,11 +11,11 @@
 //      parent cell sits in a NEIGHBOURING tile still land exactly once
 //   5. archetype mix converges to the recipe's G3 population weights
 
-import { makeRockSet, makeRockMaps, ARCHETYPES, VARIANTS, LOD_TRIS } from '../src/rockcore.js';
-import { listRocks, mesoDisp } from '../src/scattercore.js';
-import { makeBaker } from '../src/bakecore.js';
-import { bodyById } from '../src/recipe.js';
-import { vnoise3 } from '../src/mathx.js';
+import { makeRockSet, makeRockMaps, ARCHETYPES, VARIANTS, LOD_TRIS } from '../src/core/rockcore.js';
+import { listRocks, mesoDisp } from '../src/core/scattercore.js';
+import { makeBaker } from '../src/core/bakecore.js';
+import { bodyById } from '../src/core/recipe.js';
+import { vnoise3 } from '../src/core/mathx.js';
 
 let failures = 0;
 const check = (name, ok, detail = '') => {
