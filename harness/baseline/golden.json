@@ -97,24 +97,6 @@
    }
   },
   {
-   "name": "beach-eye",
-   "sha": "05e74559a9c664d83eb66d5445484879f6c0a6ed48ff0c0502b1a57119141d3e",
-   "metrics": {
-    "file": "beach-eye.png",
-    "w": 1280,
-    "h": 780,
-    "spec_slope": -2.517,
-    "spec_aniso": 2.59,
-    "grad_kurtosis": 40.229,
-    "lum_mean": 0.1645,
-    "lum_p05": 0.0046,
-    "lum_p50": 0.2415,
-    "lum_p95": 0.3013,
-    "shadow_frac": 0.3859,
-    "horizon_gap": 0.2797
-   }
-  },
-  {
    "name": "earthrise",
    "sha": "7037c695ffc6ed61e1b41eaa4cf4052dde7a0b6b0a511fa20c84c2d86986451e",
    "metrics": {

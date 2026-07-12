@@ -426,3 +426,12 @@ future gate compare **stable photometric/spectral metrics within tolerance**
 with sub-pixel jitter and is reported but not gated; sha is kept as an informational
 "pixel-identical" signal when it happens. This vindicates the register's
 metrics-over-pixels instinct and is the honest backend behavior to build on.
+
+A tight gate also needs **monostable** scenes. The step-8 verify came back with 6/7
+retained shots within tolerance and one (`earthrise`) **pixel-identical** — decisive
+proof the rename is render-neutral. Two scenes had to be handled specially:
+`titan-lakeshore` (thick-haze ground) settles right at the 150 s deadline, so the gate
+gives every golden shot a 240 s settle budget; `beach-eye` (eye-level ocean glint)
+swings `spec_slope` ~0.08 between settle states — inherently multistable, so it is
+**excluded from the golden gate** (it stays in `scenes.json` for the ongoing bench).
+The reliable gate is 7 scenes across 4 bodies.

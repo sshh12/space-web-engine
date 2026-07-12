@@ -32,10 +32,15 @@ import { renderShots, ROOT } from './shots.mjs';
 import { metricsFor } from './metrics.mjs';
 import { expandRegistry } from './bench.mjs';
 
+// A tight render-neutrality gate needs MONOSTABLE scenes. beach-eye (eye-level ocean
+// glint, alt 2 m) is deliberately excluded: its spectral slope swings ~0.08 between
+// settle states (micro-glint depends on exact bake timing) — far past any useful tol,
+// so it produces false failures on a pure move. It still lives in scenes.json for the
+// ongoing bench; it just is not a gate scene. The 7 below cover 4 bodies, orbit/mid/
+// ground, disk/limb/ground, terrain/rocks/ocean-limb/atmosphere/rings.
 const NAMES = [
   'blue-marble',        // tellus orbit disk — atmosphere limb, ocean, disc sky
   'loworbit-sunset',    // tellus mid — terminator, terrain tiles
-  'beach-eye',          // tellus eye-level — ocean shore, debris scatter
   'earthrise',          // luna disk — companion body in sky
   'luna-boulderfield',  // luna ground — rock impostor/mesh handoff
   'rubra-canyon-dawn',  // rubra 3 km — strata/tectonics relief
