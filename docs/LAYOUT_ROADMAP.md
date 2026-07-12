@@ -378,3 +378,51 @@ that exists, on a golden set captured before surgery.
 - **Critique panels as checked-in workflows** → re-authored per round from the
   kernel primitives; the finder/skeptic pattern is documented in ROADMAP_V2 and the
   snapshot tag.
+
+---
+
+## 11. Execution log (what was actually built)
+
+Executed top-to-bottom against the `archive/pre-reorg` snapshot. Per-step commits;
+every step gated as specified.
+
+- **Steps 1–6 — done as written.** Snapshot+tag; template/bench-sediment/critique
+  deletes; docs → `docs/`; `assets/` → `cache/` (gitignored, manifest untracked) with
+  the determinism proof promoted to `test/assets-test.mjs`; `src/` split into
+  `core/`+`render/` (all imports rewritten, 14/14 pure-Node suites green); the harness
+  kernel (`shots.mjs` renderShots + ephemeral server, `bench.mjs` gate with
+  system-derived controls, `metrics.mjs` + absorbed `sequenceMetrics`, `motion.mjs`
+  as a composition, `serve.mjs`); golden capture over 8 diverse pinned scenes.
+- **`.env` kept, not deleted.** It is gitignored (absent from the snapshot), so
+  deleting it is unrecoverable; it is invisible to git anyway. Left in place.
+- **Step 7 — partial.** `src/scenespec.js` landed as the shared, PURE SceneSpec schema
+  (defaults-as-data table + `validateSpec`, validated against all 97 registry specs;
+  the harness now fail-fasts bad specs). **Deferred:** the `createEngine()` factory and
+  moving `main.js`'s `__shot` apply-logic onto the table — held with the DOM-decoupling
+  refactor so `main.js` (1518 lines, tightly coupled to the inspector DOM) churns once,
+  not twice. It is the single genuinely large/risky refactor remaining, now protected
+  by the golden gate. `main.js` is unchanged; `apps/inspector.html` still loads it.
+- **Step 8 — done.** `planet.html` → `apps/inspector.html` (one relative-path fix);
+  harness default page repointed. Verified render-neutral by the golden gate.
+  **Foolrate:** the two Python scripts moved to `harness/` (capability preserved) so
+  `bench/` dissolves; the offscreen-canvas JS port (§7) is deferred with the other
+  remaining work — it is episodic/human-triggered, not on the `npm test` path.
+- **Step 9 — done.** `tsconfig.json` (`checkJs`) enforced via `npm test` (runs
+  `tsc --noEmit` first — no CI, so `npm test` is the enforcement point). Typed seams
+  started at the clean set — `src/scenespec.js` (SceneSpec) + `harness/metrics.mjs`,
+  `png.mjs` (metrics records); `+@types/node`. `include` grows file-by-file; the
+  kernel/recipe/worker seams are the next incremental additions.
+
+### Correction to §6/§8 — the gate is metric-tolerance, NOT pixel identity
+
+The plan assumed SwiftShader is byte-deterministic, making pixel identity the golden
+gate. **Measured false:** SwiftShader + the async bake workers are **bistable across
+processes** — a complex scene settles into one of a few sub-perceptually-different
+pixel states depending on which tiles finished baking when the settle predicate fired
+(`blue-marble` alternates between two fixed shas, Δlum_mean ≈ 5e-4; run A reproduced
+the capture sha *exactly*, run B the other state). So `golden --verify` and every
+future gate compare **stable photometric/spectral metrics within tolerance**
+(`spec_slope` 0.05, `lum_mean` 0.02, `shadow_frac` 0.02, …); `grad_kurtosis` swings
+with sub-pixel jitter and is reported but not gated; sha is kept as an informational
+"pixel-identical" signal when it happens. This vindicates the register's
+metrics-over-pixels instinct and is the honest backend behavior to build on.

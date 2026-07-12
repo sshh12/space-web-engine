@@ -224,6 +224,7 @@ export function limbProfile(lum, W, H) {
 
 export function metricsFor(path, tags = {}) {
   const { lum, W, H } = luminance(readPNG(path));
+  /** @type {Record<string, any>} — optional horizon_gap/limb are added conditionally below */
   const m = {
     file: basename(path), w: W, h: H,
     ...spectrumMetrics(lum, W, H),

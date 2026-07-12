@@ -7,6 +7,6 @@ import { startServer } from './shots.mjs';
 const port = +(process.env.PORT || 8131);
 const { url, close } = await startServer(undefined, port);
 console.log(`serving repo at ${url}`);
-console.log(`open ${url}/apps/inspector.html   (or ${url}/planet.html pre-step-8)`);
+console.log(`open ${url}/apps/inspector.html`);
 console.log('Ctrl-C to stop.');
 process.on('SIGINT', async () => { await close(); process.exit(0); });

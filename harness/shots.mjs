@@ -32,7 +32,7 @@ const MIME = {
   '.bin': 'application/octet-stream', '.map': 'application/json',
 };
 
-// Minimal static server rooted at the repo — resolves /planet.html, /src/**, /cache/**.
+// Minimal static server rooted at the repo — resolves /apps/**, /src/**, /cache/**.
 // Blocks path traversal; anything outside ROOT is 403. Returns { url, close }.
 // Exported so `harness/serve.mjs` can expose it for interactive dev (no Python).
 export function startServer(root = ROOT, port = 0) {
@@ -95,7 +95,7 @@ function toShots(input) {
  * @param {Object} [opts]
  *   parallel  number of concurrent pages (default 1)
  *   out       output dir for stills + records.json (default harness/out)
- *   page      page path to load (default 'planet.html')
+ *   page      page path to load (default 'apps/inspector.html')
  *   url       full URL override (else built from the ephemeral server + page)
  *   fast      append ?fast=1 (default true — SwiftShader honesty)
  *   retries   fresh-page retries on unsettled/error (default 1)
@@ -106,7 +106,7 @@ function toShots(input) {
  */
 export async function renderShots(input, opts = {}) {
   const {
-    parallel = 1, out = resolve(ROOT, 'harness/out'), page: pagePath = 'planet.html',
+    parallel = 1, out = resolve(ROOT, 'harness/out'), page: pagePath = 'apps/inspector.html',
     fast = true, retries = 1, seed = null, w = 1280, h = 780, dpr = 1, recycle = 12, quiet = false,
   } = opts;
   const shots = toShots(input);

@@ -10,6 +10,7 @@
     "bench:motion": "node harness/motion.mjs",
     "shots": "node harness/shots.mjs",
     "assets": "node scripts/assets.mjs",
+    "typecheck": "tsc --noEmit",
     "test": "node test/all.mjs",
     "test:contract": "node test/contract-test.mjs",
     "test:global": "node test/global-test.mjs",
@@ -26,5 +27,9 @@
   },
   "dependencies": {
     "puppeteer": "^23.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^26.1.1",
+    "typescript": "^7.0.2"
   }
 }

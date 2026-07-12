@@ -1,0 +1,24 @@
+{
+  "//": "checkJs on the TYPED SEAMS only (LAYOUT_ROADMAP §8). Not a bundler config — the",
+  "//2": "runtime stays no-build. `tsc --noEmit` runs inside `npm test` so this can't decay.",
+  "//3": "THREE comes from a CDN importmap (no node_modules/three), so the render layer is",
+  "//4": "deliberately NOT included; we grow `include` file-by-file as seams get JSDoc types.",
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "allowJs": true,
+    "checkJs": true,
+    "noEmit": true,
+    "strict": false,
+    "noImplicitAny": false,
+    "skipLibCheck": true,
+    "lib": ["ES2022", "DOM"],
+    "types": ["node"]
+  },
+  "include": [
+    "src/scenespec.js",
+    "harness/png.mjs",
+    "harness/metrics.mjs"
+  ]
+}
