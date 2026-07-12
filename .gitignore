@@ -11,6 +11,8 @@ __pycache__/
 # is proven by test/assets-test.mjs, not by a committed hash file.
 cache/
 
-# harness run outputs (stills, boards) stay local; only baseline/metrics.json commits
+# harness run outputs stay local; only the small committed baselines
+# (baseline/metrics.json, baseline/golden.json) are tracked.
 harness/out/
-harness/baseline/*.png
+harness/baseline/stills/
+harness/baseline/records.json

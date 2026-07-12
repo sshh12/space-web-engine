@@ -127,12 +127,24 @@ export async function renderShots(input, opts = {}) {
   if (exe) launch.executablePath = exe;
   const browser = await puppeteer.launch(launch);
 
+  // A cold page's __ready waits for the first full bake; under N-way SwiftShader
+  // contention that can be slow, so give it room and one retry before giving up.
   async function freshPage() {
-    const p = await browser.newPage();
-    await p.setViewport({ width: w, height: h, deviceScaleFactor: dpr });
-    await p.goto(url, { waitUntil: 'networkidle0', timeout: 120000 });
-    await p.waitForFunction(() => window.__ready && window.__ready(), { timeout: 240000, polling: 250 });
-    return p;
+    let lastErr;
+    for (let attempt = 0; attempt < 2; attempt++) {
+      let p;
+      try {
+        p = await browser.newPage();
+        await p.setViewport({ width: w, height: h, deviceScaleFactor: dpr });
+        await p.goto(url, { waitUntil: 'networkidle0', timeout: 120000 });
+        await p.waitForFunction(() => window.__ready && window.__ready(), { timeout: 300000, polling: 250 });
+        return p;
+      } catch (e) {
+        lastErr = e;
+        try { if (p) await p.close(); } catch { /* already gone */ }
+      }
+    }
+    throw lastErr;
   }
 
   // Capture one spec on `page`: apply, settle, screenshot to `file`, drain page errors.
