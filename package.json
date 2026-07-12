@@ -1,12 +1,11 @@
 {
-  "name": "image-to-procedural",
+  "name": "space-web-engine",
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "description": "Template: AI image gen -> albedo + height map -> displaced 3D terrain -> headless screenshots.",
+  "description": "Deterministic procedural planet renderer -> SpaceEngine x KSP-class game engine (space-to-surface, multiplayer).",
   "scripts": {
     "serve": "python -m http.server 8131",
-    "shots": "node screenshot.mjs http://localhost:8131/viewer.html shots",
     "shots:planet": "node screenshot.mjs \"http://localhost:8131/planet.html?fast=1\" shots-planet",
     "shots:critique": "node screenshot.mjs \"http://localhost:8131/planet.html?fast=1\" shots-critique test/critique-suite.json",
     "bench": "node bench/run.mjs",
@@ -14,7 +13,7 @@
     "cast": "node bench/casting.mjs",
     "assets": "node scripts/assets.mjs",
     "assets:check": "node scripts/assets.mjs --check",
-    "test": "node test/bake-test.mjs",
+    "test": "node test/all.mjs",
     "test:contract": "node test/contract-test.mjs",
     "test:global": "node test/global-test.mjs",
     "test:reload": "node test/reload-test.mjs",

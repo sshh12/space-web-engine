@@ -1,7 +1,0 @@
-path descent: 36 frames
-descent {"pop_p99":0.8485,"frames":36}
-path orbit-pan: 36 frames
-orbit-pan {"pop_p99":0.0201,"frames":36}
-path ocean-fixed: 30 frames
-ocean-fixed {"pop_p99":0.2496,"frames":30,"flicker_energy":0.00096}
-wrote C:\dev\planet-render\bench\out\motion\motion-metrics.json
