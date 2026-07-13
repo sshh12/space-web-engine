@@ -9,6 +9,7 @@
     "bench": "node harness/bench.mjs",
     "bench:motion": "node harness/motion.mjs",
     "shots": "node harness/shots.mjs",
+    "profile": "node harness/profile.mjs",
     "assets": "node scripts/assets.mjs",
     "typecheck": "tsc --noEmit",
     "test": "node test/all.mjs",

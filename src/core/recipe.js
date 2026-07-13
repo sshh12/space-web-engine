@@ -135,11 +135,6 @@ export const SYSTEM = {
         // day. period divides 4096 (bench hygiene).
         lightning: { color: [0.5, 0.62, 1.0], rate: 0.018, freq: 46, period: 4 },
       },
-      // round 16 — city lights (§10 night pack, optional): warm sodium-amber night
-      // emission on habitable coastal lowlands. Existence is a LOD-free closed form
-      // (climate + coast), body-fixed hashed, footprint-folded to a smooth glow from
-      // orbit (the night-hemisphere icon reads as clustered coastal light).
-      nightLights: { color: [1.0, 0.72, 0.38], density: 0.6, freq: 850 },
       // material BRDF params (Phase 1b): soils lean Lambert with a mild surge;
       // ice is translucent (SSS wrap) with glossy facets
       brdf: { regolithW: 0.3, surgeHs: 0.07, surgeB0: 0.25, iceSSS: 0.7, iceSpec: 0.3, iceRough: 0.32, rockSpec: 0.06, rockRough: 0.6 },
@@ -962,7 +957,7 @@ export function assertFigureRecipe(body) {
   if (body.atmosphere) throw new Error(`figure(${body.id}): atmosphere on a figure body is round 18+ (airless scope law)`);
   if (body.seaLevel != null) throw new Error(`figure(${body.id}): seaLevel/ocean on a figure body is round 18+ (dry scope law)`);
   if (body.clouds) throw new Error(`figure(${body.id}): clouds on a figure body is round 18+`);
-  if (body.nightLights || body.aurora || body.clouds?.lightning) {
+  if (body.aurora || body.clouds?.lightning) {
     throw new Error(`figure(${body.id}): night emission on a figure body is round 18+ (emission paths key radial up/alt)`);
   }
   if (body.rocks || body.formations) {

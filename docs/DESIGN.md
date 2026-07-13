@@ -1783,7 +1783,7 @@ rasters displace; the sphere is merely the common case." One law everywhere:
 
 ## Build round 16 — Phase 4 content + Phase 3 recipes (Opus-driven)
 
-Exec row 16: aurora, lightning, global dust storms, polar hoods, optional city lights;
+Exec row 16: aurora, lightning, global dust storms, polar hoods;
 Titan + Venus recipes (data) with band-annotated bench scenes — "stamps and config on the
 round-15 stack; recipes are data by design (§6)." Plus the round-14/15 rule-3 residue.
 
@@ -1830,13 +1830,7 @@ that wrap at the vnoise period (never the uTimeS sawtooth — panel wrap-seam).
 
 Lightning is one post-loop add at the near deck: a `vhash(cell × CPU-computed time
 bucket)` fires a fraction of convective cells, spiking `exp(-frac·6)` and gated on local
-coverage — deterministic, machine-identical, drowned by day. City lights got all four
-panel fixes: existence is a LOD-FREE closed form of body-fixed position (temperate ×
-coastal-lowland × clustering — NOT the per-tile atlas, which pops across splits), the
-settlement lattice hashes body-fixed `up` (§9), and it FOLDS to a smooth
-density·radiance glow as the pixel footprint grows past a cell (§7/§11 sub-pixel
-emitter), resolving to speckle only up close. Night-gated, extinguished by aerial
-perspective, drowned by day via the exposure servo (no day-gate — the airglow contract).
+coverage — deterministic, machine-identical, drowned by day.
 
 ### Weather config (workstream B) — §8 "coverage is a field, volume is a look"
 

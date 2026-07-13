@@ -91,7 +91,7 @@ function makeClassifier(system) {
       .some((o) => !r15.has(o.body.id) && (o.dirBF[0] * up[0] + o.dirBF[1] * up[1] + o.dirBF[2] * up[2]) > -Math.sin(viewAng));
   };
   const nightEmissionInView = (body, spec) => {
-    if (!body.atmosphere?.aurora && !body.nightLights) return false;
+    if (!body.atmosphere?.aurora) return false;
     const s = ephemeris(body, tOf(body, spec)).sunDirBF;
     return capDirs(spec).some((d) => (d[0] * s[0] + d[1] * s[1] + d[2] * s[2]) < 0.05);
   };

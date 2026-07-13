@@ -473,6 +473,25 @@ impact:
   **re-captured on GPU** (SwiftShader pixels ≠ GPU pixels); provenance records the exact
   renderer string so a GPU baseline and a CPU run can never be silently compared.
 
+### Load-time profiling — a waterfall, added
+
+Before this, the harness measured *total* settle `ms` per shot plus a `__stream()`
+*snapshot* and steady-state per-frame `__perf()` — enough to know a scene was slow, not
+*where* the time went (the bake worker doesn't even self-report). Added:
+- **`harness/profile.mjs`** (`npm run profile <scene>…`) — fires the scene and polls
+  `__stream()` to build a **subsystem drain waterfall**: per-subsystem (tiles, rocks,
+  forms, clouds, disc, fade) when its backlog hit zero + peak backlog + the bottleneck.
+  Example: `rubra-canyon-dawn` (15 s) is **tiles (166, 14.9 s) + rocks (13 s)**;
+  `blue-marble` (2.7 s) is fade/tile-light. No engine change — it fires `__shot`
+  without blocking and reads existing hooks.
+- **`renderShots({ profile: true })`** attaches the timeline to each record;
+  **`{ trace: true }`** (`--trace`) writes a Perfetto/`chrome://tracing` file per shot —
+  the full main-thread/worker/GPU flamegraph (176 k events) for the deep dive.
+
+Limits (honest): the waterfall is ~150 ms-granular queue-drain timing, not per-tile CPU
+cost — for that, the Perfetto trace is the tool. Per-bake-call timing attributed to tile
+coords would be future engine-side instrumentation; not needed yet.
+
 **`src/` and `apps/` needed no changes.** The backend is 100 % a headless-Chrome launch
 flag in `harness/shots.mjs`. The engine renders through `THREE.WebGLRenderer`
 (already `powerPreference:'high-performance'`, a discrete-GPU hint) and is agnostic to

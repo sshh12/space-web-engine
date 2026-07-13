@@ -265,7 +265,7 @@
 > Baseline re-promoted (tag `round-17`).
 > **Status (build round 16, July 2026 — Opus-driven per the model plan):**
 > **Phase 4 content + Phase 3 recipes — aurora, lightning, global dust storms,
-> polar hoods, city lights; Titan + Venus + Saturn as pure §6 recipe data.**
+> polar hoods; Titan + Venus + Saturn as pure §6 recipe data.**
 > "Stamps and config on the round-15 stack" — three DATA workstreams plus two
 > small data-driven engine GENERALISATIONS, and the ONE thing the "recipes are
 > data" framing hid, surfaced by an 8-reader recon before a line was written:
@@ -290,10 +290,7 @@
 > lower, OI red upper), curtain + substorm phases as CPU-double uniforms that
 > wrap at the vnoise period (never the uTimeS sawtooth). Lightning: one post-loop
 > vhash(cell × CPU time-bucket) flash at the near deck, gated on coverage.
-> City lights: all four panel fixes — LOD-FREE closed-form habitability (climate
-> × coast, NOT the per-tile atlas), body-fixed hashed lattice (§9), a fwidth
-> footprint-FOLD to a smooth glow from orbit resolving to speckle up close
-> (§7/§11 sub-pixel emitter), night-gated, drowned by day. **Weather config
+> **Weather config
 > (B, "coverage is a field, volume is a look"):** the global dust storm and
 > polar hood are ONE gated additive term each into covAt, default-no-op so the
 > legacy decks bake byte-identical; both key closed-form on orbital season (a
@@ -515,7 +512,7 @@
 > bench-housekeeping pin repair (the puppeteer-declared Chrome 131 cache
 > entry is broken; 149 is the operative binary via env override).
 > **Next: round 16 = Phase 4 content + Phase 3 recipes — run on Opus** (exec
-> row 16: aurora, lightning, dust storms, polar hoods, city lights; Titan +
+> row 16: aurora, lightning, dust storms, polar hoods; Titan +
 > Venus recipes as data on this round's deck-list schema).
 > **Status (build round 14, July 2026 — Fable-driven per the model plan):**
 > **Beyond the heightfield: the non-heightfield geometry class + the
@@ -1371,7 +1368,7 @@ no new baked state except the horizon field.
 | Sky ambient from the LUT | `[sky]` | Terrain ambient becomes an irradiance LUT lookup keyed on the **sample's** altitude and sun elevation — not a global uniform metered under the camera (v0's shortcut, which paints daytime ambient onto the night side whenever a view spans the terminator; the split-screen disc framing makes it glaring). Ground and sky *still* cannot disagree, and lighting stops depending on where the camera is. |
 | Physical camera v1 | `[camera]` | PSF bloom (energy-conserving kernel post-exposure), lens flare/veiling glare optional, sensor grain (deterministic per-frame hash keyed on time), white-balance choice (D65 "as-camera" vs as-scene), selectable metering (avg/center/spot) — auto-exposure already exists. |
 | Night sky v2 | `[sky]` `[recipe]` | Real bright-star catalog (Hipparcos/Gaia top ~9000 baked to a small texture) with B–V → color temperature and true magnitudes; hashed faint tail continuing the magnitude power law; the **Milky Way** as an inertial-frame integrated-starlight radiance map (§9 — it must rotate with the star backdrop); a few clusters/nebulae as catalog entries; zodiacal light lobe along the ecliptic. Stars don't twinkle in vacuum — scintillation appears only through an atmosphere, as a camera-time effect. |
-| Night-side pack | `[sky]` `[look]` `[frame]` | What makes a night hemisphere *read*: planetshine (§10 — the moonlit ground and the moonlit ocean glint), aurora ovals pulled forward from Phase 4 for the night-disk shot, airglow limb (✅) plus faint disc-interior airglow structure (gravity-wave banding as a `[time-field]` look), optional city lights, and exposure behavior that lets the dark side sit *dark* against the star field instead of washing teal. |
+| Night-side pack | `[sky]` `[look]` `[frame]` | What makes a night hemisphere *read*: planetshine (§10 — the moonlit ground and the moonlit ocean glint), aurora ovals pulled forward from Phase 4 for the night-disk shot, airglow limb (✅) plus faint disc-interior airglow structure (gravity-wave banding as a `[time-field]` look), and exposure behavior that lets the dark side sit *dark* against the star field instead of washing teal. |
 | Whole-disc ladder v2 | `[ladder]` `[bake]` | §11 as written: **disc albedo from the root tiles** — bake each body's six root tiles down to a small equirect albedo/elevation map once (deterministic, cached), and have the disc representation sample it, shaded with the same Hapke/L-S photometry and limb profile as the terrain, hand-downs mean- and variance-preserving through disc → point flux. A moon at 20 px must show its maria and its correct phase curve — never a white ball. This also feeds planetshine (the §10 whole-disc radiance) for free. |
 | Eclipse & transit machinery | `[frame]` `[sky]` | Penumbra-aware cone test of the solar disc vs the body list (§10) — moon transit shadow dots on the primary, umbra/penumbra gradients, copper lunar eclipses via the occluder's transmittance spectrum. Counts are data: works for any system. |
 
@@ -1847,10 +1844,9 @@ CONCEPT §8 already specifies the design: **coverage is a field, volume is a loo
 - Global dust storms (Mars) = a slow time-keyed coverage mode of the same field;
   polar haze hoods = latitude-shaped aerosol term; multi-deck clouds and cyclonic
   systems = coverage field octaves with vortex stamps (advected, closed-form).
-- Night-side emissives: auroral ovals (magnetic-pole-ringed emission term, recipe),
-  lightning (deterministic transient stamps — hash of (cell, time-window), so two
-  machines render the same storm), city lights explicitly *optional* (an emission
-  field like any other; a biosignature toggle, not a default).
+- Night-side emissives: auroral ovals (magnetic-pole-ringed emission term, recipe)
+  and lightning (deterministic transient stamps — hash of (cell, time-window), so
+  two machines render the same storm).
 
 **Anchor board:** `bench/boards/board-tellus-loworbit-sunset-clouds.webp` (synthetic —
 art direction, not scored). The character it demands: broken cumulus with real
@@ -1981,7 +1977,7 @@ re-orderings explained below the table):
 | ~~13~~ ✅ | **Phase 2 mechanical residue** (SHIPPED): Whittaker biomes v2 (temp×moist biome-class palette, wide ecotones), seasonal volatile cap (spin-invariant declination overlay, ground + companion disc), strata-in-plan (G2, in-shader fold matching the bake), space weathering from `age` (keyed on `fresh`×slope — youth is Luna-degenerate, caught pre-code), inverted relief (procInvert: additive mid-flow-band paleochannel ridges), wetness; + rule-3 residue (deflected-wind moisture, resurfacing-age crater SFD, lee streaks). R4/R6 registered forward. | **Opus** | Config/formula over the round-12 fields |
 | ~~14~~ ✅ | **Beyond the heightfield** (SHIPPED): formation archetypes (hoodoo/undercut-outcrop/buried-footing-arch + calved-block fields — closed-form grid solids, no marching cubes; Rubra strata agent + Tellus outcrop agent at LOCATED sites; Luna honestly absent), displacement-decimated rock sculpts (subset-placement quadric chain, same budgets, 2.8× lower silhouette error — closes the silhouette residue), the mesh→impostor→roughness ladder (L14 band, fit-space hull maps, EXACT-anchor rung handoff). 5 pre-code killers caught on paper. R6 basin/mare unification shipped alongside. | **Fable** | The novelty round earned its model: the panel killed five designs-as-written before code |
 | 15 | **Phase 4 clouds core**: coverage `[time-field]`, raymarch ↔ shell ↔ orbital ladder, cloud shadows as coverage along the sun ray; **the WebGPU checkpoint decision** — **SHIPPED round 15 (checkpoint: DEFER, data-driven — see the status block)** | **Fable** | The biggest new subsystem left, a three-representation unification, and a strategic port decision consuming perf data — worth the frontier model once, done right |
-| 16 | **Phase 4 content + Phase 3 recipes**: aurora, lightning, global dust storms, polar hoods, optional city lights; Titan + Venus recipes (data) with band-annotated bench scenes | **Opus** | **SHIPPED round 16** — emission pack + weather config + Titan/Venus/Saturn recipes + the NB-body capacity widening (see the status block) | Stamps and config on the round-15 stack; recipes are data by design (§6) |
+| 16 | **Phase 4 content + Phase 3 recipes**: aurora, lightning, global dust storms, polar hoods; Titan + Venus recipes (data) with band-annotated bench scenes | **Opus** | **SHIPPED round 16** — emission pack + weather config + Titan/Venus/Saturn recipes + the NB-body capacity widening (see the status block) | Stamps and config on the round-15 stack; recipes are data by design (§6) |
 | 17 | **Phase 5 figure generality**: oblate/triaxial domains, contact-binary reference SDF, per-cell metric tensors, injectivity asserts, irregular-domain seam fixture | **Fable** | **SHIPPED round 17** — the ray-crossing base-domain law + metric tensors + injectivity asserts + the seam fixture + vesta/haumea/arrokoth (see the status block) | Genuinely novel domain math — the roadmap itself flags contact binaries "harder and the roadmap says so" |
 | 18 | **Phase 5 cryo pack + Phase 6 giants/rings** | **Opus** | **SHIPPED round 18** — Saturn banded giant + analytic ring system (Cassini/Encke gaps, mutual shadows, forward-scatter) + the Europa/Pluto cryo pack (lineae, chaos, glacier, polygons, sublimation, tholin); the ROADMAP_V2 closeout (see the status block) | Many small well-specified processes once round 17's fixtures exist; giants/rings are analytic + recipe work |
 
@@ -2193,7 +2189,6 @@ whole-disk identity. Phase 2 unless noted.
 | Moons + transit shadows | `[frame]` `[sky]` | 1 | Body-list cone test (the eclipse machinery) |
 | Auroral ovals | `[recipe]` `[sky]` | 4 | Emission term ringed on magnetic poles, night-side |
 | Comet coma + tail | `[frame]` `[sky]` | 6 | Analytic coma/tail objects; geometry pure ephemeris |
-| City lights (night side) | `[recipe]` `[look]` | 4 (optional) | Emission field; a biosignature toggle, never default |
 | Cyclonic weather | `[time-field]` | 4 | Vortex stamps + fronts in the coverage field |
 | Multi-deck clouds | `[time-field]` `[ladder]` | 4 | Stacked coverage fields; gaps reveal lower decks |
 | Lightning | `[look]` | 4 | Deterministic transient emission stamps: hash(cell, time-window) |

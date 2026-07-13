@@ -907,20 +907,6 @@
    "meter": "center"
   },
   {
-   "id": 62,
-   "name": "tellus-citylights",
-   "tier": "breakpoint",
-   "exercises": "Ph4 §10 city lights: habitability-anchored night emission resolving toward coastal speckle",
-   "note": "round 16 optional: closed-form habitability (climate + coast), body-fixed hashed, footprint-folded. From this mid altitude it reads as clustered coastal glow; from orbit (#4/#57) a smooth wash.",
-   "body": "tellus",
-   "lat": 38,
-   "lon": -80,
-   "alt": 1500000,
-   "phaseDeg": 170,
-   "pitch": 84,
-   "fov": 60
-  },
-  {
    "id": 63,
    "name": "vesta-orbit",
    "tier": "breakpoint",

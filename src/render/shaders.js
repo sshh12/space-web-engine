@@ -511,46 +511,6 @@ export const COMMON = /* glsl */ `
   uniform float uLightRate;                   // fraction of cells flashing per bucket
   uniform float uLightFreq;                   // convective-cell lattice frequency
   uniform vec2  uLightBucket;                 // (per-bucket seed, frac-through-bucket) — CPU, unwrapped t
-  uniform vec3  uCityCol;                     // city-light radiance (warm); zero disables
-  uniform float uCityDensity;                 // overall night-lights strength
-  uniform float uCityFreq;                    // settlement lattice frequency
-
-  // city lights (round 16): habitability-anchored night emission. All four pre-code
-  // panel fixes: (1) EXISTENCE is a LOD-FREE closed form of body-fixed position — a
-  // latitude-band (temperate) × coastal-lowland (altitude) × clustering PROXY, NOT
-  // the per-tile veg/moist atlas (which is LOD-dependent — the forbidden path; panel
-  // citylights-lod); (2) the point lattice hashes body-fixed up (§9, panel
-  // body-fixed-hash); (3) it FOLDS to a smooth density·radiance glow as the pixel
-  // footprint grows past a cell, resolving to speckle only up close, so from orbit
-  // it is a steady dim wash — mean-preserving (§7/§11, panel firefly); (4) night-
-  // gated by (1−lit) and extinguished by aerial perspective at the call site.
-  // Expresses geology (habitability from climate/coast), never a painted map.
-  vec3 cityLights(vec3 pPC, float sinEl){
-    if (uCityDensity <= 0.0) return vec3(0.0);
-    float night = 1.0 - smoothstep(-0.05, 0.15, sinEl);
-    if (night <= 0.002) return vec3(0.0);
-    vec3 up = normalize(pPC);
-    float alt = length(pPC) - uPlanetR;
-    float lat = asin(clamp(up.y, -1.0, 1.0));
-    float temper = 1.0 - smoothstep(0.55, 1.15, abs(lat));            // mid-latitudes
-    float lowland = 1.0 - smoothstep(300.0, 2500.0, max(alt, 0.0));   // coastal lowland
-    float land = step(1.0, alt);                                      // above the datum = land
-    float cluster = smoothstep(0.1, 0.62, 0.5 + 0.5 * noise3(up * 5.0, 613)); // population patches
-    float hab = clamp(uCityDensity * temper * lowland * land * cluster, 0.0, 1.0);
-    if (hab <= 0.002) return vec3(0.0);
-    float glow = hab;   // the smooth mean an orbital footprint sees
-    #ifndef VERT_STAGE
-      // discrete settlement specks up close: a cell lights at rate hab (so the
-      // per-cell mean is exactly hab — the fold is mean-preserving), folding to
-      // the smooth hab glow as the footprint spans more than a cell.
-      float pt = vhash(ivec3(floor(up * uCityFreq)), 811);
-      float speck = step(pt, hab);
-      float resolve = 1.0 - smoothstep(0.3, 1.0, length(fwidth(up * uCityFreq)));
-      glow = mix(hab, speck, resolve);
-    #endif
-    return uCityCol * glow * night;
-  }
-
   // one raster tap for deck d at world direction dir, explicit LOD only —
   // textureLod so the stars VERTEX splice and fragments agree, and so the
   // FIELD never reads screen derivatives (§5/K9: LOD comes from ray geometry;
@@ -1684,10 +1644,6 @@ export const TERRAIN_FRAG = /* glsl */ `
       col += uSunRad * Ts * ggxSpec(n, V, uSunDir, specRough) * specW;
     }
 
-    // city lights (round 16): habitability-anchored night emission, added BEFORE
-    // aerial perspective so distant glow is extinguished by haze (§7). pPC is
-    // body-fixed; the fold/night-gate live in the helper.
-    col += cityLights(pPC, sinEl);
     // -- aerial perspective IS the sky integral applied to terrain (§8) --
     float dist = max(length(vWorld), 1.0);
     vec3 ard = vWorld / dist;

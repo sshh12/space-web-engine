@@ -183,9 +183,6 @@ const shared = {
   uLightRate: { value: 0 },
   uLightFreq: { value: 40 },
   uLightBucket: { value: new THREE.Vector2(0, 0) },
-  uCityCol: { value: new THREE.Vector3() },
-  uCityDensity: { value: 0 },
-  uCityFreq: { value: 900 },
   // photo mode ([camera], Phase T): white-balance tint + film grade. Both default
   // to exact identity (WB=1, grade=0) so non-photo renders are bit-unchanged.
   uWB: { value: new THREE.Vector3(1, 1, 1) },
@@ -521,16 +518,6 @@ function switchBody(id) {
   } else {
     shared.uLightCol.value.set(0, 0, 0);
     shared.uLightRate.value = 0;
-  }
-  // city lights: habitability-anchored night emission (round 16, optional)
-  const nl = body.nightLights;
-  if (nl) {
-    shared.uCityCol.value.fromArray(nl.color ?? [1.0, 0.78, 0.45]);
-    shared.uCityDensity.value = nl.density ?? 0.5;
-    shared.uCityFreq.value = nl.freq ?? 900;
-  } else {
-    shared.uCityCol.value.set(0, 0, 0);
-    shared.uCityDensity.value = 0;
   }
   const brdf = body.brdf ?? {};
   shared.uBrdfA.value.set(brdf.regolithW ?? 0.3, brdf.surgeHs ?? 0.06, brdf.surgeB0 ?? 0.3, brdf.iceSSS ?? 0.5);

@@ -122,6 +122,7 @@ export async function renderShots(input, opts = {}) {
   const {
     parallel = 1, out = resolve(ROOT, 'harness/out'), page: pagePath = 'apps/inspector.html',
     fast = true, retries = 1, seed = null, w = 1280, h = 780, dpr = 1, recycle = 12, quiet = false,
+    profile = false, trace = false,
   } = opts;
   const shots = toShots(input);
   const stills = resolve(out, 'stills');
@@ -193,12 +194,40 @@ export async function renderShots(input, opts = {}) {
   }
 
   // Capture one spec on `page`: apply, settle, screenshot to `file`, drain page errors.
+  // Two modes:
+  //  - default (gate): the blocking __shot returns the authoritative { settled, ms }.
+  //  - profile: FIRE __shot without awaiting and poll __stream() to build a load
+  //    waterfall — a timeline of the pending counts (tiles/rocks/forms/clouds/disc) so
+  //    an agent can see WHERE the settle time went, not just the total. Optional Chrome
+  //    trace (page.tracing) writes a Perfetto file for the deep main-thread/worker view.
   async function capture(page, spec, file) {
-    const res = await page.evaluate((s) => window.__shot(s), spec);
-    await new Promise((r) => setTimeout(r, 250));
-    await page.screenshot({ path: file });
-    const errors = await page.evaluate(() => (window.__pageErrors ?? []).splice(0));
-    return { settled: res ? res.settled !== false : true, ms: res ? res.ms : null, errors };
+    if (trace) await page.tracing.start({ path: file.replace(/\.png$/, '.trace.json'), screenshots: false });
+    let out;
+    if (profile) {
+      const t0 = Date.now();
+      await page.evaluate((s) => { window.__shot(s); }, spec);        // fire, don't await the settle
+      const timeline = [];
+      const deadline = spec.waitMs ?? 240000;
+      for (;;) {
+        const s = await page.evaluate(() => (window.__stream ? window.__stream() : null));
+        if (!s) break;
+        timeline.push({ t: Date.now() - t0, ...s });
+        if (s.stable > 6 || Date.now() - t0 > deadline) break;
+        await new Promise((r) => setTimeout(r, 150));
+      }
+      await page.screenshot({ path: file });
+      const errors = await page.evaluate(() => (window.__pageErrors ?? []).splice(0));
+      const last = timeline[timeline.length - 1];
+      out = { settled: !!last && last.stable > 6, ms: last ? last.t : null, errors, timeline };
+    } else {
+      const res = await page.evaluate((s) => window.__shot(s), spec);
+      await new Promise((r) => setTimeout(r, 250));
+      await page.screenshot({ path: file });
+      const errors = await page.evaluate(() => (window.__pageErrors ?? []).splice(0));
+      out = { settled: res ? res.settled !== false : true, ms: res ? res.ms : null, errors };
+    }
+    if (trace) await page.tracing.stop();
+    return out;
   }
 
   const records = new Array(shots.length);
@@ -235,6 +264,7 @@ export async function renderShots(input, opts = {}) {
             c = await capture(page, shot.spec, file);
           }
           rec.png = file; rec.settled = c.settled; rec.ms = c.ms; rec.errors = c.errors;
+          if (c.timeline) rec.profile = c.timeline;
         }
       } catch (e) {
         rec.errors.push('driver: ' + String(e).split('\n')[0]);
