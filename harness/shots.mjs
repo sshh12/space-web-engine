@@ -21,10 +21,22 @@ import { mkdirSync, writeFileSync, readFileSync, statSync } from 'node:fs';
 import { readdirSync } from 'node:fs';
 import { resolve, join, extname, normalize } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
-import { homedir } from 'node:os';
+import { homedir, cpus } from 'node:os';
 import { execSync } from 'node:child_process';
 
 export const ROOT = resolve(fileURLToPath(import.meta.url), '../..');
+
+// Suggested page-pool size. IMPORTANT, measured on this repo (32 cores): under the
+// headless SwiftShader backend, parallelism does NOT help. SwiftShader is a CPU
+// rasterizer that saturates every core for a SINGLE render, so N concurrent pages each
+// run at ~1/N speed — total wall-time is the same or worse, and the inflated per-shot
+// wall-clock trips the settle deadline into false "unsettled". So the default is 1 on
+// SwiftShader. Parallelism only pays off on a REAL GPU (each page's draw work leaves
+// the CPU free): set PUPPETEER_EXECUTABLE_PATH to a GPU Chrome, then raise it with
+// PARALLEL=n / --parallel n. The page pool + boot mutex exist for exactly that case
+// and for sharding across machines.
+export const defaultParallel = () =>
+  process.env.PUPPETEER_EXECUTABLE_PATH ? Math.max(1, Math.min(6, Math.floor(cpus().length / 4))) : 1;
 
 const MIME = {
   '.html': 'text/html', '.js': 'text/javascript', '.mjs': 'text/javascript',
@@ -127,17 +139,28 @@ export async function renderShots(input, opts = {}) {
   if (exe) launch.executablePath = exe;
   const browser = await puppeteer.launch(launch);
 
-  // A cold page's __ready waits for the first full bake; under N-way SwiftShader
-  // contention that can be slow, so give it room and one retry before giving up.
+  // Boot mutex: a cold page's __ready waits for a full default-view bake. N of those
+  // bakes at once thrash the SwiftShader rasterizer (measured: parallel cold boots, not
+  // the renders, are the bottleneck). Serialize the boots — one page cold-boots at a
+  // time — while letting already-booted pages RENDER concurrently. That overlaps the
+  // next boot with the previous page's render instead of thrashing all boots together.
+  let bootChain = Promise.resolve();
   async function freshPage() {
+    const mine = bootChain.then(() => bootOne());
+    bootChain = mine.catch(() => {});   // chain the next boot after this one settles
+    return mine;
+  }
+  async function bootOne() {
     let lastErr;
     for (let attempt = 0; attempt < 2; attempt++) {
       let p;
       try {
+        const t0 = Date.now();
         p = await browser.newPage();
         await p.setViewport({ width: w, height: h, deviceScaleFactor: dpr });
         await p.goto(url, { waitUntil: 'networkidle0', timeout: 120000 });
         await p.waitForFunction(() => window.__ready && window.__ready(), { timeout: 300000, polling: 250 });
+        if (!quiet) log(`  [boot ${((Date.now() - t0) / 1000).toFixed(0)}s]`);
         return p;
       } catch (e) {
         lastErr = e;
@@ -161,7 +184,11 @@ export async function renderShots(input, opts = {}) {
   const flush = () => writeFileSync(resolve(out, 'records.json'),
     JSON.stringify(records.filter(Boolean).map((r) => ({ ...r, provenance })), null, 1));
 
-  async function worker() {
+  async function worker(startDelay) {
+    // Stagger cold boots: N pages each bake the default view before __ready, so
+    // starting them all at once makes the first bakes collide (that was the parallel=2
+    // __ready timeout). Offsetting each worker's first boot spreads the cold load.
+    if (startDelay) await new Promise((r) => setTimeout(r, startDelay));
     let page = await freshPage();
     let since = 0;
     for (;;) {
@@ -204,7 +231,9 @@ export async function renderShots(input, opts = {}) {
     await page.close();
   }
 
-  await Promise.all(Array.from({ length: Math.max(1, parallel) }, () => worker()));
+  const N = Math.max(1, parallel);
+  const stagger = opts.stagger ?? 0;   // boot mutex already serializes cold boots
+  await Promise.all(Array.from({ length: N }, (_, k) => worker(k * stagger)));
   await browser.close();
   if (server) await server.close();
 

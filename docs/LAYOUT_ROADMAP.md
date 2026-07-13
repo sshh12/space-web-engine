@@ -427,6 +427,21 @@ with sub-pixel jitter and is reported but not gated; sha is kept as an informati
 "pixel-identical" signal when it happens. This vindicates the register's
 metrics-over-pixels instinct and is the honest backend behavior to build on.
 
+### Parallel rendering — measured a non-win on SwiftShader
+
+`renderShots` has a page pool (`parallel: N`) and a boot mutex, but **parallelism does
+not speed up the headless backend**. Measured on 32 cores: SwiftShader is a CPU
+rasterizer that saturates every core for a *single* render, so N concurrent pages each
+run at ~1/N speed — total wall-time is flat-to-worse, and the inflated per-shot
+wall-clock trips the settle deadline into false "unsettled" (at parallel=3, blue-marble
+went from 19 s to >240 s and failed to settle). The cold **boots** (a full default-view
+bake per page) are separately contention-prone; the boot mutex serializes them so they
+stop thrashing. Net: the default page-pool size is **1 under SwiftShader**. Parallelism
+only pays off where a page's draw work leaves the CPU free — a **real GPU** Chrome
+(`PUPPETEER_EXECUTABLE_PATH`, then `PARALLEL=n`), or **sharding across machines**. The
+pool + boot mutex exist for exactly those cases; they are correct, just not exploitable
+by the software rasterizer.
+
 A tight gate also needs **monostable** scenes. The step-8 verify came back with 6/7
 retained shots within tolerance and one (`earthrise`) **pixel-identical** — decisive
 proof the rename is render-neutral. Two scenes had to be handled specially:

@@ -28,7 +28,7 @@ const TOL = { spec_slope: 0.05, spec_aniso: 0.2, lum_mean: 0.02, lum_p05: 0.03, 
 import { createHash } from 'node:crypto';
 import { readFileSync, writeFileSync, mkdirSync, existsSync } from 'node:fs';
 import { resolve } from 'node:path';
-import { renderShots, ROOT } from './shots.mjs';
+import { renderShots, ROOT, defaultParallel } from './shots.mjs';
 import { metricsFor } from './metrics.mjs';
 import { expandRegistry } from './bench.mjs';
 
@@ -69,7 +69,7 @@ if (shots.length !== NAMES.length) {
 }
 
 console.log(`${VERIFY ? 'verifying' : 'capturing'} ${shots.length} golden shots (seed ${SEED})`);
-const recs = await renderShots(shots, { out: OUT, parallel: +(process.env.PARALLEL || 2), seed: SEED });
+const recs = await renderShots(shots, { out: OUT, parallel: +(process.env.PARALLEL || defaultParallel()), seed: SEED });
 
 const broken = recs.filter((r) => r.errors.length || !r.settled);
 if (broken.length) {

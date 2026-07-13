@@ -16,7 +16,7 @@
 //   node harness/bench.mjs --parallel 3
 import { readFileSync, writeFileSync, existsSync, mkdirSync } from 'node:fs';
 import { resolve } from 'node:path';
-import { renderShots, ROOT } from './shots.mjs';
+import { renderShots, ROOT, defaultParallel } from './shots.mjs';
 import { metricsFor } from './metrics.mjs';
 import { SYSTEM, bodyById } from '../src/core/recipe.js';
 import { validateSpec } from '../src/scenespec.js';
@@ -154,7 +154,7 @@ const args = process.argv.slice(2);
 const opt = (name, dflt) => { const i = args.indexOf(name); return i >= 0 ? (args[i + 1] && !args[i + 1].startsWith('--') ? args[i + 1] : true) : dflt; };
 const FILTER = opt('--filter', null);
 const PROMOTE = args.includes('--promote');
-const PARALLEL = +(opt('--parallel', 1));
+const PARALLEL = +(opt('--parallel', defaultParallel()));
 const utcSeed = () => { const d = new Date(); return d.getUTCFullYear() * 10000 + (d.getUTCMonth() + 1) * 100 + d.getUTCDate(); };
 const SEED = opt('--seed', null) != null ? parseInt(opt('--seed'), 10) : utcSeed();
 
