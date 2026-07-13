@@ -26,17 +26,19 @@ import { execSync } from 'node:child_process';
 
 export const ROOT = resolve(fileURLToPath(import.meta.url), '../..');
 
-// Suggested page-pool size. IMPORTANT, measured on this repo (32 cores): under the
-// headless SwiftShader backend, parallelism does NOT help. SwiftShader is a CPU
-// rasterizer that saturates every core for a SINGLE render, so N concurrent pages each
-// run at ~1/N speed — total wall-time is the same or worse, and the inflated per-shot
-// wall-clock trips the settle deadline into false "unsettled". So the default is 1 on
-// SwiftShader. Parallelism only pays off on a REAL GPU (each page's draw work leaves
-// the CPU free): set PUPPETEER_EXECUTABLE_PATH to a GPU Chrome, then raise it with
-// PARALLEL=n / --parallel n. The page pool + boot mutex exist for exactly that case
-// and for sharding across machines.
+// Which rasterizer the headless Chrome uses. GPU by default (ANGLE picks the platform
+// hardware backend — D3D11 on Windows); HARNESS_BACKEND=swiftshader forces the CPU
+// fallback for GPU-less boxes / CI.
+export function resolveBackend(opt) { return opt || process.env.HARNESS_BACKEND || 'gpu'; }
+
+// Suggested page-pool size. On the GPU the draw work leaves the CPU free (only the bake
+// Web Worker is CPU-bound), so parallel pages overlap well — budget ~4 logical cores
+// per page, capped. On SwiftShader parallelism is a measured NON-WIN: it is a CPU
+// rasterizer that saturates every core for a single render, so N concurrent pages each
+// run at ~1/N and the inflated wall-clock trips settle deadlines into false "unsettled"
+// — so 1. Override either with PARALLEL=n / --parallel n.
 export const defaultParallel = () =>
-  process.env.PUPPETEER_EXECUTABLE_PATH ? Math.max(1, Math.min(6, Math.floor(cpus().length / 4))) : 1;
+  resolveBackend() === 'swiftshader' ? 1 : Math.max(1, Math.min(8, Math.floor(cpus().length / 4)));
 
 const MIME = {
   '.html': 'text/html', '.js': 'text/javascript', '.mjs': 'text/javascript',
@@ -127,28 +129,40 @@ export async function renderShots(input, opts = {}) {
 
   const server = opts.url ? null : await startServer();
   const url = opts.url || `${server.url}/${pagePath}${fast ? '?fast=1' : ''}`;
-  const provenance = { backend: 'swiftshader', fast, dpr, seed, commit: gitCommit() };
+  const backend = resolveBackend(opts.backend);
   const log = (...a) => { if (!quiet) console.log(...a); };
+
+  // Backend: real GPU (D3D11/Metal/GL via ANGLE's platform default) by DEFAULT, since
+  // it renders orders faster and — unlike the SwiftShader CPU rasterizer — leaves the
+  // CPU free during draw so parallel pages actually overlap. SwiftShader stays as the
+  // GPU-less/CI fallback (HARNESS_BACKEND=swiftshader). Provenance carries the real
+  // renderer string (filled after boot) so a GPU run and a CPU run never get compared.
+  const gpuArgs = ['--use-gl=angle', '--ignore-gpu-blocklist', '--enable-gpu-rasterization'];
+  const swArgs = ['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist'];
+  const provenance = { backend, renderer: null, fast, dpr, seed, commit: gitCommit() };
 
   const launch = {
     headless: 'new', protocolTimeout: 420000,
-    args: ['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader',
-      '--no-sandbox', '--ignore-gpu-blocklist', `--window-size=${w},${h}`],
+    args: [...(backend === 'swiftshader' ? swArgs : gpuArgs),
+      '--no-sandbox', `--window-size=${w},${h}`],
   };
   const exe = chromePath();
   if (exe) launch.executablePath = exe;
   const browser = await puppeteer.launch(launch);
 
-  // Boot mutex: a cold page's __ready waits for a full default-view bake. N of those
-  // bakes at once thrash the SwiftShader rasterizer (measured: parallel cold boots, not
-  // the renders, are the bottleneck). Serialize the boots — one page cold-boots at a
-  // time — while letting already-booted pages RENDER concurrently. That overlaps the
-  // next boot with the previous page's render instead of thrashing all boots together.
+  // Boot mutex — SwiftShader only. A cold page's __ready waits for a full default-view
+  // bake AND its (CPU) render; on SwiftShader N of those at once saturate every core and
+  // thrash, so boots are serialized there. On the GPU the render is offloaded and only
+  // the bake Web Worker is on the CPU, so concurrent boots fit comfortably in 32 cores —
+  // serializing them there would just throw away the parallelism, so we don't.
   let bootChain = Promise.resolve();
   async function freshPage() {
-    const mine = bootChain.then(() => bootOne());
-    bootChain = mine.catch(() => {});   // chain the next boot after this one settles
-    return mine;
+    if (backend === 'swiftshader') {
+      const mine = bootChain.then(() => bootOne());
+      bootChain = mine.catch(() => {});   // chain the next boot after this one settles
+      return mine;
+    }
+    return bootOne();
   }
   async function bootOne() {
     let lastErr;
@@ -160,6 +174,14 @@ export async function renderShots(input, opts = {}) {
         await p.setViewport({ width: w, height: h, deviceScaleFactor: dpr });
         await p.goto(url, { waitUntil: 'networkidle0', timeout: 120000 });
         await p.waitForFunction(() => window.__ready && window.__ready(), { timeout: 300000, polling: 250 });
+        if (provenance.renderer == null) {
+          provenance.renderer = await p.evaluate(() => {
+            const gl = document.createElement('canvas').getContext('webgl2') || document.createElement('canvas').getContext('webgl');
+            const dbg = gl && gl.getExtension('WEBGL_debug_renderer_info');
+            return dbg ? gl.getParameter(dbg.UNMASKED_RENDERER_WEBGL) : 'unknown';
+          }).catch(() => 'unknown');
+          if (!quiet) log(`  [backend ${backend}: ${provenance.renderer}]`);
+        }
         if (!quiet) log(`  [boot ${((Date.now() - t0) / 1000).toFixed(0)}s]`);
         return p;
       } catch (e) {

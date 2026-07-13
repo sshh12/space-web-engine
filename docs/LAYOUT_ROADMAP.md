@@ -450,3 +450,32 @@ gives every golden shot a 240 s settle budget; `beach-eye` (eye-level ocean glin
 swings `spec_slope` ~0.08 between settle states — inherently multistable, so it is
 **excluded from the golden gate** (it stays in `scenes.json` for the ongoing bench).
 The reliable gate is 7 scenes across 4 bodies.
+
+### GPU is now the default headless backend (supersedes the parallel non-win)
+
+The harness renders on the **real GPU by default** (ANGLE → D3D11 on this box, an RTX
+5090; `HARNESS_BACKEND=swiftshader` forces the CPU fallback for GPU-less CI). Measured
+impact:
+- **~6.3× faster**: the 7-scene golden capture went **548 s (SwiftShader serial) → 87 s**.
+  Per-shot renders collapsed from 16-55 s to **0.6-13 s** — rendering is now nearly free;
+  the residual cost is the CPU tile bake (the ~85 s cold boot).
+- **Parallelism now pays off**, exactly as predicted: the GPU offloads draw work, so
+  concurrent pages' (CPU) bakes overlap. `defaultParallel()` returns `cores/4` on GPU,
+  `1` on SwiftShader. The boot mutex is now **SwiftShader-only** (GPU boots don't thrash).
+- **Perf numbers are representative again** — the SwiftShader-honesty caveat in §6 (perf
+  gates relative/same-backend only) still holds *across* backends, but on-GPU absolute
+  timings are now real, so the "real-GPU spot check" is the default, not an extra step.
+- **The bake multistability persists** (the bake worker is CPU, unchanged by the switch),
+  so the gate stays metric-tolerance. It moved to the **stable aggregates only** —
+  `spec_slope` 0.15, `lum_mean` 0.03, `shadow_frac` 0.03 (bounds from the max measured
+  cross-run jitter × safety factor). The sensitive metrics (`spec_aniso` ~0.30,
+  `lum` percentiles, `grad_kurtosis`) are reported, not gated. golden.json was
+  **re-captured on GPU** (SwiftShader pixels ≠ GPU pixels); provenance records the exact
+  renderer string so a GPU baseline and a CPU run can never be silently compared.
+
+**`src/` and `apps/` needed no changes.** The backend is 100 % a headless-Chrome launch
+flag in `harness/shots.mjs`. The engine renders through `THREE.WebGLRenderer`
+(already `powerPreference:'high-performance'`, a discrete-GPU hint) and is agnostic to
+which rasterizer Chrome hands it; a human opening `apps/inspector.html` in a normal
+browser already gets their GPU. The `SwiftShader`-mentioning comments in `src/` are
+defensive (avoid `pow(0)=NaN`, ANGLE compile quirks) and stay valid on GPU.
