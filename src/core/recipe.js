@@ -2,13 +2,20 @@
 // the star, then each body as a recipe plus orbital/rotation elements. Counts are
 // data; nothing else in the codebase hardcodes a body. Pure data, importable by the
 // worker, the main thread and Node tests alike.
+// Phase-K sign transcription (standard ecliptic -> engine XZ ecliptic):
+// +X→standard +Y becomes +X→engine +Z, so i/Ω/ω and Ωdot/ωdot keep their
+// published signs; the corresponding prograde angular-momentum pole is -Y.
+
+import { assertMechanicsSystem } from './mechanics.js';
 
 export const AU = 1.496e11; // m
 
 export const SYSTEM = {
   id: 'demo-system',
+  validYears: 5000,
   star: {
     name: 'Sol',
+    GM: 1.32712440018e20,     // m^3/s^2; Phase K's rails/physics consistency root
     radius: 6.96e8,           // m — sets the disc's angular size per body
     irradianceAt1AU: 25.0,    // radiance scale of the whole renderer (relative units)
     color: [1.0, 0.96, 0.9],  // spectrum stand-in
@@ -18,6 +25,7 @@ export const SYSTEM = {
       id: 'tellus',
       name: 'Tellus (Earth-like)',
       parent: 'star',
+      GM: 3.986004418e14,
       R: 6_371_000,
       orbit: { a: 1.0 * AU, periodDays: 365.25, phase0: 0.0 },
       spin: { tiltDeg: 23.4, periodH: 24, phase0: 0.0 },
@@ -173,6 +181,7 @@ export const SYSTEM = {
       id: 'rubra',
       name: 'Rubra (Mars-like)',
       parent: 'star',
+      GM: 4.282837e13,
       R: 3_389_500,
       orbit: { a: 1.52 * AU, periodDays: 687, phase0: 2.2 },
       spin: { tiltDeg: 25.2, periodH: 24.6, phase0: 0.0 },
@@ -321,6 +330,7 @@ export const SYSTEM = {
       id: 'luna',
       name: 'Luna (airless moon)',
       parent: 'tellus',
+      GM: 4.9048695e12,
       R: 1_737_000,
       orbit: { a: 3.84e8, periodDays: 27.3, phase0: 1.1 },
       spin: { tiltDeg: 1.5, periodH: 27.3 * 24, phase0: 0.0 },
@@ -416,6 +426,7 @@ export const SYSTEM = {
       id: 'titan',
       name: 'Titan (organic-haze moon)',
       parent: 'saturn',
+      GM: 8.9781382e12,
       R: 2_574_700,
       orbit: { a: 1.2219e9, periodDays: 15.945, phase0: 0.7 }, // around Saturn (tidally locked)
       spin: { tiltDeg: 26.7, periodH: 15.945 * 24, phase0: 0.0 }, // locked; Saturn's obliquity drives seasons
@@ -494,6 +505,7 @@ export const SYSTEM = {
       id: 'venus',
       name: 'Venus (runaway greenhouse)',
       parent: 'star',
+      GM: 3.24858592e14,
       R: 6_052_000,
       orbit: { a: 0.723 * AU, periodDays: 224.7, phase0: 4.1 },
       spin: { tiltDeg: 177.4, periodH: 243 * 24, phase0: 0.0 }, // retrograde, ~upside-down (≈no seasons)
@@ -571,6 +583,7 @@ export const SYSTEM = {
       id: 'saturn',
       name: 'Saturn (banded gas giant + rings — best seen from Titan\'s sky)',
       parent: 'star',
+      GM: 3.7931187e16,
       R: 58_232_000,
       orbit: { a: 9.58 * AU, periodDays: 10759, phase0: 0.9 },
       spin: { tiltDeg: 26.7, periodH: 10.7, phase0: 0.0 },
@@ -649,6 +662,7 @@ export const SYSTEM = {
       id: 'vesta',
       name: 'Vesta (oblate protoplanet — Rheasilvia basin)',
       parent: 'star',
+      GM: 1.7288e10,
       R: 262_000, // volumetric mean of the figure below
       figure: {
         // the POLAR (short) semi-axis sits on +Y — the engine's spin/latitude
@@ -698,6 +712,7 @@ export const SYSTEM = {
       id: 'haumea',
       name: 'Haumea (extreme triaxial fast-spinner — crystalline ice)',
       parent: 'star',
+      GM: 2.674e11,
       R: 801_000, // (abc)^(1/3)
       figure: {
         // short (polar) axis on +Y = the spin axis — a fast spinner flattens
@@ -739,6 +754,7 @@ export const SYSTEM = {
       id: 'arrokoth',
       name: 'Arrokoth (contact binary — the neck)',
       parent: 'star',
+      GM: 2.4e5,
       R: 9_000,
       figure: {
         type: 'lobes',
@@ -794,6 +810,7 @@ export const SYSTEM = {
       id: 'europa',
       name: 'Europa (icy moon — tidal lineae + chaos)',
       parent: 'star',
+      GM: 3.2027388e12,
       skyHidden: true, // standalone: never rendered in another body's sky (keeps legacy skies byte-identical)
       R: 1_560_800,
       orbit: { a: 5.203 * AU, periodDays: 4333, phase0: 1.3 }, // heliocentric stand-in (no Jupiter in SYSTEM)
@@ -843,6 +860,7 @@ export const SYSTEM = {
       id: 'pluto',
       name: 'Pluto (nitrogen glacier + tholin uplands)',
       parent: 'star',
+      GM: 8.6961382e11,
       skyHidden: true, // standalone: never rendered in another body's sky (keeps legacy skies byte-identical)
       R: 1_188_300,
       orbit: { a: 39.48 * AU, periodDays: 90560, phase0: 4.1 },
@@ -891,7 +909,11 @@ export const SYSTEM = {
   ],
 };
 
-export const bodyById = (id) => SYSTEM.bodies.find((b) => b.id === id);
+// Phase K: fail named schema/GM/parent errors at recipe load, before a renderer
+// or worker tears down live state. The demo remains entirely on legacy branches.
+assertMechanicsSystem(SYSTEM);
+
+export const bodyById = (id, system = SYSTEM) => system.bodies.find((b) => b.id === id);
 
 // recipe load assert (round 16, pre-code panel saturn-palette-crash): bakeDiscMap
 // reads palette.dust/rock UN-defaulted (bakecore.js), so a body missing them throws
@@ -917,6 +939,17 @@ export function assertPaletteRecipe(body) {
   }
   if (has('tholin') && !Array.isArray(p.tholin)) {
     throw new Error(`recipe: body '${body.id}' has a 'tholin' process but no palette.tholin (the dark-province colour)`);
+  }
+  for (const proc of body.processes ?? []) {
+    if (proc.type === 'tholin' && !['longitude', 'polar'].includes(proc.placement ?? 'longitude')) {
+      throw new Error(`recipe: body '${body.id}' tholin.placement must be 'longitude' or 'polar'`);
+    }
+    if (proc.type === 'context' && proc.insolation) {
+      if (!(proc.insolation.referenceA > 0)) throw new Error(`recipe: body '${body.id}' context.insolation.referenceA must be > 0`);
+      if (body.parent === 'star' && !(body.orbit?.a > 0)) {
+        throw new Error(`recipe: body '${body.id}' uses insolation context but has no authored heliocentric orbit.a`);
+      }
+    }
   }
   return true;
 }
@@ -1003,28 +1036,21 @@ export function assertRingRecipe(body) {
   }
   return true;
 }
-// one-shot SYSTEM check: at most one giant body (the shader carries ONE uGiant* set)
-export function assertGiantSystem() {
-  const giants = SYSTEM.bodies.filter((b) => b.giant);
-  if (giants.length > 1) {
-    throw new Error(`giant: SYSTEM has ${giants.length} giant bodies (${giants.map((b) => b.id).join(', ')}) — the shader carries ONE uGiant* set (M5 no silent caps)`);
-  }
+// Phase C co-visible-set checks: system cardinality is data; fixed per-profile
+// knot/gap caps remain asserted for every body in the resolved set.
+export function assertGiantSystem(system = SYSTEM, coVisible = system.bodies) {
+  // Phase C carries one giant profile PER resolved slot. Any number may exist in
+  // the loaded system; callers may pass the <=K resolved set for a named guard.
+  for (const body of coVisible) assertGiantRecipe(body);
   return true;
 }
-// one-shot SYSTEM check: at most one RINGED body (the shader carries ONE uRing*
-// set, overwritten per-slot; two co-visible ringed bodies would silently render
-// with the last-written params — post-impl ring-2). assertGiantSystem does NOT
-// cover this (it filters b.giant), so the ring case needs its own guard.
-export function assertRingSystem() {
-  const ringed = SYSTEM.bodies.filter((b) => b.rings);
-  if (ringed.length > 1) {
-    throw new Error(`ring: SYSTEM has ${ringed.length} ringed bodies (${ringed.map((b) => b.id).join(', ')}) — the shader carries ONE uRing* set (M5 no silent caps)`);
-  }
+export function assertRingSystem(system = SYSTEM, coVisible = system.bodies) {
+  for (const body of coVisible) assertRingRecipe(body);
   return true;
 }
 
 // star irradiance (relative radiance units) at orbital radius a — CONCEPT §10:
 // inverse-square arithmetic, never authored brightness.
-export function irradianceAt(a) {
-  return SYSTEM.star.irradianceAt1AU * (AU / a) * (AU / a);
+export function irradianceAt(a, system = SYSTEM) {
+  return system.star.irradianceAt1AU * (AU / a) * (AU / a);
 }

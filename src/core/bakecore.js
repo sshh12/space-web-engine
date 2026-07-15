@@ -484,7 +484,8 @@ function procContext(ctx, p) {
     const lat = latOf([dirs[c * 3], dirs[c * 3 + 1], dirs[c * 3 + 2]]);
     const sl = Math.sin(lat);
     const wobble = 2.5 * noise3(dirs[c * 3] * 3, dirs[c * 3 + 1] * 3, dirs[c * 3 + 2] * 3, s);
-    const temp = p.tempEq + (p.tempPole - p.tempEq) * sl * sl - Math.max(height[c], 0) * p.lapse + wobble;
+    const insol = insolationTemperatureOffset(ctx.insolation?.get(p), lat);
+    const temp = p.tempEq + (p.tempPole - p.tempEq) * sl * sl - Math.max(height[c], 0) * p.lapse + wobble + insol;
     ice[c] = smoothstep(p.iceTemp + 12, p.iceTemp - 12, temp);
   }
 }
@@ -1784,8 +1785,10 @@ function procTholin(ctx, p) {
   const { dirs, fields } = ctx;
   const tholinAlb = fields.tholinAlb;
   const s = p.seed | 0;
+  const placement = p.placement ?? 'longitude';
   const lonC = (p.lonCenter ?? 0) * DEG, lonW = (p.lonWidth ?? 90) * DEG;
   const latB = (p.latBand ?? 35) * DEG, strength = p.strength ?? 0.8;
+  const capLat = (p.capLatDeg ?? 55) * DEG, capSoft = (p.capSoftDeg ?? 12) * DEG;
   for (let c = 0; c < N; c++) {
     const x = dirs[c * 3], y = dirs[c * 3 + 1], z = dirs[c * 3 + 2];
     const lon = Math.atan2(z, x), lat = Math.asin(clamp(y, -1, 1));
@@ -1795,7 +1798,8 @@ function procTholin(ctx, p) {
     const warp = 0.18 * fbm3(x * 3, y * 3, z * 3, s + 7, 4, 2.2, 0.55);
     const lonM = smoothstep(lonW, lonW * 0.55, Math.abs(dlon) - warp);
     const latM = smoothstep(latB, latB * 0.5, Math.abs(lat));
-    tholinAlb[c] = clamp(strength * lonM * latM, 0, 1); // OVERWRITE — arrives whole
+    const polarM = smoothstep(capLat - capSoft, capLat + capSoft, Math.abs(lat) + warp * 0.25);
+    tholinAlb[c] = clamp(strength * (placement === 'polar' ? polarM : lonM * latM), 0, 1);
   }
 }
 
@@ -1897,6 +1901,14 @@ export function makeBaker(body, { cacheMax = 700 } = {}) {
   const cache = new Map(); // "face/level/x/y" -> tile
   const faceArc = (Math.PI / 2) * body.R;
   const fig = figOf(body); // null for every legacy body (sphere = the common case)
+  let insolation = new Map();
+  const rebuildInsolation = () => {
+    insolation = new Map();
+    for (const p of body.processes ?? []) {
+      if (p.type === 'context' && p.insolation) insolation.set(p, makeInsolationContext(body, p));
+    }
+  };
+  rebuildInsolation();
 
   function bakeTile(face, level, x, y) {
     const key = `${face}/${level}/${x}/${y}`;
@@ -1975,7 +1987,7 @@ export function makeBaker(body, { cacheMax = 700 } = {}) {
       // density band narrower than a few lattice cells strings its rocks into
       // a single-file queue (round-5 live report, bead-chain register row)
       rockCell: body.rocks ? faceArc / (TILE_RES << body.rocks.latticeLevel) : 0,
-      dirs, edge, height,
+      dirs, edge, height, insolation,
       uplift: fields.uplift, rock: fields.rock, ice: fields.ice,
       ao: fields.ao, rockDensity: fields.rockDensity, fields,
     };
@@ -2060,9 +2072,21 @@ export function makeBaker(body, { cacheMax = 700 } = {}) {
   }
   // swap the process list in place (the bake loop reads body.processes live);
   // callers pair this with invalidate(invalidationLevel(old, new))
-  function setProcesses(procs) { body.processes = procs; }
+  function setProcesses(procs) { body.processes = procs; rebuildInsolation(); }
 
-  return { bakeTile, cacheSize: () => cache.size, invalidate, setProcesses, body };
+  // Phase C: the worker owns one cross-body memory budget. Expose an LRU trim
+  // primitive so its coordinator can reclaim background bakers without knowing
+  // the cache representation. Root floors are retained by asking for keep >= 6.
+  function trimCache(keep = 0) {
+    let n = 0;
+    while (cache.size > keep) {
+      cache.delete(cache.keys().next().value);
+      n++;
+    }
+    return n;
+  }
+
+  return { bakeTile, cacheSize: () => cache.size, invalidate, setProcesses, trimCache, body };
 }
 
 // face basis re-export for crater projection (avoids importing FACES twice)
@@ -2071,6 +2095,7 @@ import { FACES as FACE_BASIS } from './mathx.js';
 // process PREFIXES through makeBaker; procGlobal calls globalFor at bake time.
 // Neither touches the other at module evaluation, so ESM live bindings resolve.
 import { globalFor } from './globalgrid.js';
+import { makeInsolationContext, insolationTemperatureOffset } from './insolation.js';
 
 // bilinear height sample inside a tile's interior; fu,fv in [0,1] across the tile
 export function sampleTileHeight(tile, fu, fv) {

@@ -21,11 +21,20 @@
  */
 export const SPEC_DEFAULTS = Object.freeze({
   // --- world selection ---
-  system: null,        // system id/seed; null = the engine's built-in SYSTEM (§1.3 JIT-worlds hook)
+  system: null,        // null = whatever the engine booted; a canonical id string
+                       // ('demo-system'/'sol-system') resolves through the engine's
+                       // registry; an INLINE RECIPE PAYLOAD (Phase E) reproduces an
+                       // edited system headlessly — the same hash Phase 0 stamps
+                       // into provenance identifies it
   // body has no table default: an omitted body keeps the current one (apply only
   // switches when spec.body is present). Named here for validation, resolved by apply.
 
   // --- epoch / time ---
+  epochS: null,         // primary J2000-analog seconds; null resolves legacy views
+  warp: 0,             // DECLARED warp (signed, ×real time). The Phase W capture
+                       // law: representation selection is a pure function of this
+                       // declared value at the pinned epoch — the clock itself
+                       // stays frozen during capture, exactly as before.
   season: 0.15,        // orbital phase (round-3: this resets like everything else)
   // tday is intentionally STICKY in apply today (set only when present; phaseDeg
   // solves it). Documented quirk — a uniform reset is a behavior change registered
@@ -68,6 +77,19 @@ export function validateSpec(spec) {
   if (spec == null || typeof spec !== 'object') return { ok: false, errors: ['spec is not an object'] };
   for (const k of Object.keys(spec)) {
     if (!KNOWN.has(k)) { errors.push(`unknown field: ${k}`); continue; }
+    if (k === 'epochS' && spec[k] !== null && (typeof spec[k] !== 'number' || !Number.isFinite(spec[k]))) {
+      errors.push('epochS must be a finite number|null'); continue;
+    }
+    if (['tday', 'waitMs', 'phaseDeg'].includes(k) && (typeof spec[k] !== 'number' || !Number.isFinite(spec[k]))) {
+      errors.push(`${k} must be a finite number`); continue;
+    }
+    if (k === 'body' && typeof spec[k] !== 'string') { errors.push('body must be a string'); continue; }
+    if (k === 'system' && spec[k] !== null) {
+      const v = spec[k];
+      const payload = typeof v === 'object' && !Array.isArray(v) && Array.isArray(v.bodies) && typeof v.id === 'string';
+      if (typeof v !== 'string' && !payload) errors.push('system must be null, a system id string, or an inline recipe payload ({ id, bodies, ... })');
+      continue;
+    }
     const def = SPEC_DEFAULTS[k];
     if (def == null) continue;                       // no typed default (body/tday/solvers/nullable)
     const want = typeof def, got = typeof spec[k];
@@ -82,5 +104,16 @@ export function validateSpec(spec) {
 export function withDefaults(spec = {}) {
   const out = { ...SPEC_DEFAULTS };
   for (const k of Object.keys(spec)) out[k] = spec[k];
+  return out;
+}
+
+/** Apply reset semantics while preserving tday's documented sticky behavior. */
+export function resolveSpec(spec = {}, sticky = {}) {
+  /** @type {any} */
+  const out = withDefaults(spec);
+  if (spec.tday === undefined) {
+    if (sticky.tday !== undefined) out.tday = sticky.tday;
+    else delete out.tday;
+  }
   return out;
 }

@@ -1,0 +1,82 @@
+{
+ "registered": "2026-07-13",
+ "method": "measured x1.5 + floor",
+ "budgets": {
+  "detent-demo-1": {
+   "pop_p99": 0.0176,
+   "flicker_energy": 0.000012
+  },
+  "detent-demo-3600": {
+   "pop_p99": 0.073,
+   "flicker_energy": 0.000163
+  },
+  "detent-demo-86400": {
+   "pop_p99": 0.0764,
+   "flicker_energy": 0.000151
+  },
+  "detent-demo-31557600": {
+   "pop_p99": 0.4705,
+   "flicker_energy": 0.01019
+  },
+  "detent-demo-315576000": {
+   "pop_p99": 0.201,
+   "flicker_energy": 0.000442
+  },
+  "warp-cross-clouds-demo": {
+   "pop_p99": 0.1701,
+   "flicker_energy": 0.000312,
+   "abMeanDelta": 0.0146,
+   "returnDelta": 0.004
+  },
+  "warp-cross-detail-demo": {
+   "pop_p99": 0.159,
+   "flicker_energy": 0.000258,
+   "abMeanDelta": 0.004,
+   "returnDelta": 0.004
+  },
+  "warp-cross-lightning-demo": {
+   "pop_p99": 0.01,
+   "flicker_energy": 0.00001,
+   "abMeanDelta": 0.004,
+   "returnDelta": 0.004
+  },
+  "detent-sol-1": {
+   "pop_p99": 0.0175,
+   "flicker_energy": 0.000012
+  },
+  "detent-sol-3600": {
+   "pop_p99": 0.0781,
+   "flicker_energy": 0.000179
+  },
+  "detent-sol-86400": {
+   "pop_p99": 0.1455,
+   "flicker_energy": 0.000571
+  },
+  "detent-sol-31557600": {
+   "pop_p99": 0.6924,
+   "flicker_energy": 0.01216
+  },
+  "detent-sol-315576000": {
+   "pop_p99": 0.6819,
+   "flicker_energy": 0.012145
+  },
+  "warp-cross-clouds-sol": {
+   "pop_p99": 0.163,
+   "flicker_energy": 0.000416,
+   "abMeanDelta": 0.02461,
+   "returnDelta": 0.004
+  },
+  "warp-cross-detail-sol": {
+   "pop_p99": 0.254,
+   "flicker_energy": 0.000584,
+   "abMeanDelta": 0.00409,
+   "returnDelta": 0.004
+  },
+  "warp-cross-lightning-sol": {
+   "pop_p99": 0.01,
+   "flicker_energy": 0.00001,
+   "abMeanDelta": 0.004,
+   "returnDelta": 0.004
+  }
+ }
+}

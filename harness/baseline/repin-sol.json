@@ -1,0 +1,14 @@
+{
+ "event": "ROADMAP_V3 Phase S Re-Pin",
+ "from": { "id": "demo-system", "recipeHash": "6bd998a2" },
+ "to": { "id": "sol-system", "recipeHash": "b89f5b85" },
+ "preclassifiedBeforeCapture": true,
+ "renderConsumers": {
+  "ephemerisSkyAndLighting": ["venus", "tellus", "luna", "rubra", "europa", "saturn", "titan", "vesta", "pluto", "haumea", "arrokoth"],
+  "cloudSeasonKeyframes": ["rubra"],
+  "insolationContext": ["venus", "tellus", "rubra", "saturn", "vesta", "haumea", "arrokoth"],
+  "newBodyMembership": ["cinis", "timor", "pavor", "iovis", "fornax", "sulcus", "vetus", "candor", "rhea", "ianus", "caelus", "ruina", "aeria", "umbra", "titania", "oberon", "pontus", "errans", "ordo", "navita"]
+ },
+ "bakeLaw": "Outside cloudSeasonKeyframes and insolationContext, re-homed existing surface recipes remain byte-identical after mechanics fields are removed; test/sol-test.mjs asserts this for all 11 retained ids.",
+ "captureLaw": "Golden metrics are re-promoted only with sol-system provenance; cross-system verification is refused."
+}

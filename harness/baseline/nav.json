@@ -1,0 +1,19 @@
+{
+  "system": { "id": "sol-system", "recipeHash": "25885364" },
+  "markerCount": 33,
+  "budgets": {
+    "travelDurationS": 18,
+    "popP99": 0.98,
+    "exposureStepEv": 8,
+    "settleMs": 180000,
+    "workerTiles": 336
+  },
+  "icon": { "litFractionMin": 0.001, "litFractionMax": 0.35 },
+  "breakpoints": {
+    "discEnterPx": 64,
+    "tilesFullPx": 80,
+    "classes": ["rocky", "giant-with-rings", "figure"],
+    "orbitLine": "finite-segment-sphere",
+    "handoff": "sub-ladder-atomic"
+  }
+}

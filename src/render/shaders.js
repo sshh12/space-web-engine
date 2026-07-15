@@ -37,9 +37,9 @@ export const COMMON = /* glsl */ `
   uniform vec3 uMsK[32];
   // eclipse & transit machinery (Phase 1): companions as sun-disc occluders
   uniform int   uNumOcc;
-  uniform vec3  uOccPos[2];   // body-fixed meters
-  uniform float uOccR[2];     // occluder radius (m)
-  uniform vec3  uOccAnn[2];   // refracted-annulus tint (copper); zero if airless
+  uniform vec3  uOccPos[3];   // body-fixed meters
+  uniform float uOccR[3];     // occluder radius (m)
+  uniform vec3  uOccAnn[3];   // refracted-annulus tint (copper); zero if airless
   // metre-scale shadows (Phase 1, §10: shadow maps scoped to m-km, camera-local
   // presentation aid — the world stays pure). Render-space (camera-relative).
   uniform mat4  uShadowMat;
@@ -380,7 +380,7 @@ export const COMMON = /* glsl */ `
     // eclipse machinery (Phase 1): analytic sun x occluder overlap + copper annulus
     float vis = 1.0;
     vec3 ann = vec3(0.0);
-    for (int i = 0; i < 2; i++) {
+    for (int i = 0; i < 3; i++) {
       if (i >= uNumOcc) break;
       vec3 dO = uOccPos[i] - p;
       float dl = max(length(dO), 1.0);
@@ -1675,51 +1675,53 @@ export const SKY_FRAG = /* glsl */ `
   // body-fixed -> inertial rotation as columns (star backdrop rotates — §9)
   uniform vec3 uB2I0, uB2I1, uB2I2;
   uniform int uNumBodies;
-  uniform vec3 uBodyDir[4];
-  uniform float uBodyAngR[4];
-  uniform vec3 uBodyCol[4];     // star color * irradiance-at-that-body / pi
-  uniform vec3 uBodySun[4];
+  uniform vec3 uBodyDir[8];
+  uniform float uBodyAngR[8];
+  uniform vec3 uBodyCol[8];     // star color * irradiance-at-that-body / pi
+  uniform vec3 uBodySun[8];
   uniform highp sampler2DArray uBodyAtlas; // 256x128 equirect albedo, one LAYER per body (§11 v2; round 16)
-  uniform vec3 uBodyR0[4], uBodyR1[4], uBodyR2[4]; // rows: our-BF -> target-BF
-  uniform float uBodyRowV[4];   // atlas LAYER (absolute body index) per visible slot
+  uniform vec3 uBodyR0[8], uBodyR1[8], uBodyR2[8]; // rows: our-BF -> target-BF
+  uniform float uBodyRowV[8];   // atlas LAYER (id -> layer) per visible slot
+  uniform float uBodyDiscLoaded[8];
+  uniform vec3 uBodyFlatAlb[8];
   // seasonal cap on companion discs (round 13): per-body frost strength/params/
   // tint; the subsolar declination comes from dot(uBodyR1[i], uBodySun[i])
-  uniform float uBodyFrostK[4];
-  uniform vec3  uBodyFrostP[4];   // (latOn, latFull, seasonK), sin-lat units
-  uniform vec3  uBodyFrostCol[4];
+  uniform float uBodyFrostK[8];
+  uniform vec3  uBodyFrostP[8];   // (latOn, latFull, seasonK), sin-lat units
+  uniform vec3  uBodyFrostCol[8];
   // round 17: render-time disc haze veil (atmosphere.discHaze — Titan); K=0
   // for every other body, and mix(a,b,0)=a exactly, so legacy discs are
   // byte-identical without a manifest re-pin
-  uniform float uBodyHazeK[4];
-  uniform vec3  uBodyHazeCol[4];
+  uniform float uBodyHazeK[8];
+  uniform vec3  uBodyHazeCol[8];
   // Phase 4 §11 (round 15): the companion's own cloud decks — the SAME
   // equirect field (uCloudMap layers) and alpha law, evaluated in the
   // TARGET's own frame at ITS drift phase and keyframe frac (the
   // seasonalFrost precedent: disc and ground agree by form)
-  uniform float uBodyCloudN[4];    // deck count per body slot
-  uniform vec4  uBodyCloudA[8];    // slot=body*2+deck: (driftPhase, 2·sigma·thick, layer, frac)
-  uniform vec3  uBodyCloudAlb[4];
+  uniform float uBodyCloudN[8];    // deck count per body slot
+  uniform vec4  uBodyCloudA[16];   // slot=body*2+deck: (driftPhase, 2·sigma·thick, layer, frac)
+  uniform vec3  uBodyCloudAlb[8];
   // round 18 — Phase 6 giant + ring. RUNTIME per-slot gates (uBodyGiant/uBodyRing
-  // default 0 ⇒ every legacy companion disc is byte-identical). ONE giant profile
-  // + ONE ring set (assertGiantSystem/assertRingSystem enforce one each). Ring radii
+  // default 0 ⇒ every legacy companion disc is byte-identical). Phase C carries
+  // one giant/ring profile per resolved slot. Ring radii
   // are ANGULAR (R·mult/dist, CPU-double) so no 1e9 m cancellation; the ring
   // normal is uBodyR1[i] (target +Y in our frame — NOT the y-column; pre-code fix).
-  uniform float uBodyGiant[4];
-  uniform float uBodyRing[4];
-  uniform vec4  uGiantBand[8];     // (sinLat, r, g, b) knots; unused weight 0
-  uniform int   uGiantBandN;
-  uniform float uGiantLimbExp, uGiantLimbK;
-  uniform vec4  uGiantStorm;       // (lon, sinLat, r, driftPhase) — rigid per-feature drift
-  uniform vec3  uGiantStormCol;
-  uniform vec4  uGiantHex;         // (latOn, amp, driftPhase, _)
-  uniform vec3  uGiantHexCol;
-  uniform float uRingInner, uRingOuter;  // ring inner/outer as EXACT ratios R·mult/dist
-  uniform float uRingRp;                 // the planet's own EXACT ratio R/dist (post-impl ring-1:
+  uniform float uBodyGiant[8];
+  uniform float uBodyRing[8];
+  uniform vec4  uGiantBand[64];    // slot*8 + knot
+  uniform int   uGiantBandN[8];
+  uniform float uGiantLimbExp[8], uGiantLimbK[8];
+  uniform vec4  uGiantStorm[8];
+  uniform vec3  uGiantStormCol[8];
+  uniform vec4  uGiantHex[8];
+  uniform vec3  uGiantHexCol[8];
+  uniform float uRingInner[8], uRingOuter[8];
+  uniform float uRingRp[8];              // the planet's own EXACT ratio R/dist (post-impl ring-1:
                                          // the shadow/occlusion tests must share the annulus scale,
                                          // not uBodyAngR=atan(R/D) which is ~0.08% off the ratio)
-  uniform vec4  uRingGap[4];       // (angR, angW, depth, active) — unrolled, ≤4
-  uniform vec3  uRingCol;
-  uniform float uRingTau, uRingFsG;
+  uniform vec4  uRingGap[32];      // slot*4 + gap
+  uniform vec3  uRingCol[8];
+  uniform float uRingTau[8], uRingFsG[8];
   // aurora/lightning/city uniforms now live in COMMON (round 16): the emission
   // moved into scatterInline so terrain/ocean carry it too, not just the sky.
   varying vec3 vRay;
@@ -1729,32 +1731,35 @@ export const SKY_FRAG = /* glsl */ `
   // the disc cannot be a static baked atlas). Fixed 8-knot unrolled blend (no
   // dynamic index), explicit squares (never pow(signed,2)). nB = the disc point's
   // unit normal in the giant's OWN body frame (nB.y = sin-lat).
-  vec3 giantBandCol(vec3 nB) {
+  vec3 giantBandCol(vec3 nB, int slot) {
     float sinLat = clamp(nB.y, -1.0, 1.0);
     vec3 acc = vec3(0.0); float wsum = 0.0;
     for (int k = 0; k < 8; k++) {
-      if (k >= uGiantBandN) break;
-      float dd = (sinLat - uGiantBand[k].x) / 0.55;
+      if (k >= uGiantBandN[slot]) break;
+      vec4 gb = uGiantBand[slot * 8 + k];
+      float dd = (sinLat - gb.x) / 0.55;
       float w = max(0.0, 1.0 - dd * dd);   // smooth triangular-square weight
       w = w * w;
-      acc += w * uGiantBand[k].yzw; wsum += w;
+      acc += w * gb.yzw; wsum += w;
     }
     vec3 band = wsum > 1e-4 ? acc / wsum : vec3(0.6);
     float lon = atan(nB.z, nB.x);
     // ONE storm oval, drifting rigidly at its latitude's rate (uGiantStorm.w is
     // the CPU-double phase; the longitude delta is angularly wrapped so the oval
     // never tears at the ±π seam — the pre-code drift-wrap findings)
-    float dlon = lon - (uGiantStorm.x + uGiantStorm.w);
+    vec4 gst = uGiantStorm[slot];
+    float dlon = lon - (gst.x + gst.w);
     dlon -= 6.2831853 * floor(dlon / 6.2831853 + 0.5);
-    float dlat = sinLat - uGiantStorm.y;
-    float sw = uGiantStorm.z * 1.8, sh = uGiantStorm.z;
+    float dlat = sinLat - gst.y;
+    float sw = gst.z * 1.8, sh = gst.z;
     float sg = exp(-(dlon * dlon) / (2.0 * sw * sw) - (dlat * dlat) / (2.0 * sh * sh));
-    band = mix(band, uGiantStormCol, 0.8 * sg);
+    band = mix(band, uGiantStormCol[slot], 0.8 * sg);
     // polar hexagon: wavenumber-6 standing wave near the pole (drifts rigidly)
-    float hexW = uGiantHex.y > 1e-5 ? smoothstep(uGiantHex.x, 1.0, sinLat) : 0.0;
+    vec4 gh = uGiantHex[slot];
+    float hexW = gh.y > 1e-5 ? smoothstep(gh.x, 1.0, sinLat) : 0.0;
     if (hexW > 0.001) {
-      float hx = 0.5 + 0.5 * cos(6.0 * (lon - uGiantHex.z));
-      band = mix(band, uGiantHexCol, hexW * (0.35 + uGiantHex.y * 6.0 * hx));
+      float hx = 0.5 + 0.5 * cos(6.0 * (lon - gh.z));
+      band = mix(band, uGiantHexCol[slot], hexW * (0.35 + gh.y * 6.0 * hx));
     }
     return band;
   }
@@ -1843,7 +1848,7 @@ export const SKY_FRAG = /* glsl */ `
       // phase curve — a moon at 20 px shows its maria, never a white ball),
       // energy-preserving point below a pixel. Texture sampled in uniform flow
       // (derivatives inside a varying branch are undefined — ANGLE landmine).
-      for (int i = 0; i < 4; i++) {
+      for (int i = 0; i < 8; i++) {
         if (i >= uNumBodies) break;
         float bAng = acos(clamp(dot(rdS, uBodyDir[i]), -1.0, 1.0));
         float eR = max(uBodyAngR[i], uPixAng * 1.5);
@@ -1853,7 +1858,7 @@ export const SKY_FRAG = /* glsl */ `
         vec3 nB = vec3(dot(uBodyR0[i], nS), dot(uBodyR1[i], nS), dot(uBodyR2[i], nS));
         vec2 buv = vec2(atan(nB.z, nB.x) / (2.0 * PI) + 0.5,
                         asin(clamp(nB.y, -1.0, 1.0)) / PI + 0.5);
-        vec3 mapAlb = texture(uBodyAtlas, vec3(buv, uBodyRowV[i])).rgb;
+        vec3 mapAlb = mix(uBodyFlatAlb[i], texture(uBodyAtlas, vec3(buv, uBodyRowV[i])).rgb, uBodyDiscLoaded[i]);
         // round 17 forward-queue (Titan §11 disc haze): a RENDER-time veil over
         // the baked ground albedo — the §11 disc agrees with the haze-tinted
         // far point without touching the manifest-pinned disc bytes. K=0 for
@@ -1872,14 +1877,14 @@ export const SKY_FRAG = /* glsl */ `
         // round 18 giant: SELECT the live banded synthesis (the atlas tap above
         // stays unconditional — uniform flow, derivatives defined; the pre-code
         // atlas-texture-varying-flow note). mapAlb unchanged for non-giant slots.
-        if (uBodyGiant[i] > 0.5) mapAlb = giantBandCol(nB);
+        if (uBodyGiant[i] > 0.5) mapAlb = giantBandCol(nB, i);
         // eclipse (Phase 1): a companion in front of the sun blocks its disc
         // per-pixel (the crescent is geometry) and its integrated fraction
         // (dims the glare); an atmosphere-bearing occluder wears the copper
         // sunset ring at its limb — the same annulus that lights the umbra.
         if (bAng < uBodyAngR[i]) sunPix = 0.0;
         visCam = min(visCam, discVis(acos(clamp(dot(uBodyDir[i], uSunDir), -1.0, 1.0)), uSunAngR, uBodyAngR[i]));
-        if (i < 2 && uOccAnn[i].r > 0.0 && visCam < 0.999) {
+        if (i < 3 && uOccAnn[i].r > 0.0 && visCam < 0.999) {
           float _rq = (bAng - uBodyAngR[i]) / max(uBodyAngR[i] * 0.06, uPixAng);
           float ringA = exp(-_rq * _rq); // explicit square (pow(x<0,2) is GLSL ES UB)
           col += trans * uSunRad * uOccAnn[i] * ringA * (1.0 - visCam);
@@ -1894,7 +1899,7 @@ export const SKY_FRAG = /* glsl */ `
           // falloff. pow(max(muv,1e-4), exp) — never pow(0)=NaN on SwiftShader;
           // exp>0 asserted at load. Replaces the regolith surge on the giant slot.
           if (uBodyGiant[i] > 0.5)
-            kd = mu0 * mix(1.0, pow(max(muv, 1e-4), uGiantLimbExp), uGiantLimbK);
+            kd = mu0 * mix(1.0, pow(max(muv, 1e-4), uGiantLimbExp[i]), uGiantLimbK[i]);
           // ring SHADOW BAND on the disc (A4 mutual shadow — the near-edge-on
           // money element). Target frame, unit-R (never uPlanetR = the RENDERED
           // body). Hard boolean gate: at Saturn equinox sT.y→0 the cast lands off
@@ -1905,12 +1910,13 @@ export const SKY_FRAG = /* glsl */ `
             float ts = -nB.y / syC;
             if (ts > 0.0) {
               vec3 q = nB + ts * sT;
-              float rr = length(q.xz) * uRingRp;  // unit-R → the EXACT R/D ratio (matches uRingInner)
-              if (rr >= uRingInner && rr <= uRingOuter) {
-                float sop = uRingTau;
+              float rr = length(q.xz) * uRingRp[i];  // unit-R → the EXACT R/D ratio (matches uRingInner)
+              if (rr >= uRingInner[i] && rr <= uRingOuter[i]) {
+                float sop = uRingTau[i];
                 for (int gk = 0; gk < 4; gk++) {
-                  float nt = uRingGap[gk].w * smoothstep(uRingGap[gk].y, 0.0, abs(rr - uRingGap[gk].x));
-                  sop *= 1.0 - uRingGap[gk].z * nt;
+                  vec4 rg = uRingGap[i * 4 + gk];
+                  float nt = rg.w * smoothstep(rg.y, 0.0, abs(rr - rg.x));
+                  sop *= 1.0 - rg.z * nt;
                 }
                 kd *= exp(-sop * 1.2);
               }
@@ -1955,34 +1961,35 @@ export const SKY_FRAG = /* glsl */ `
           float tau = dot(cHat, nHat) / rdnC;      // ring hit distance / D
           vec3 rvec = tau * rdS - cHat;            // in-plane offset / D (O(1) — no cancellation)
           float rNorm = length(rvec);
-          if (tau > 0.0 && rNorm >= uRingInner && rNorm <= uRingOuter) {
-            float op = uRingTau;
+          if (tau > 0.0 && rNorm >= uRingInner[i] && rNorm <= uRingOuter[i]) {
+            float op = uRingTau[i];
             for (int gk = 0; gk < 4; gk++) {       // ≤4 gap notches, unrolled (no dyn index)
-              float nt = uRingGap[gk].w * smoothstep(uRingGap[gk].y, 0.0, abs(rNorm - uRingGap[gk].x));
-              op *= 1.0 - uRingGap[gk].z * nt;
+              vec4 rg = uRingGap[i * 4 + gk];
+              float nt = rg.w * smoothstep(rg.y, 0.0, abs(rNorm - rg.x));
+              op *= 1.0 - rg.z * nt;
             }
             float graze = clamp(1.0 / max(abs(rdn), 0.05), 1.0, 6.0);  // edge-on path length
             float opac = 1.0 - exp(-op * graze * 0.7);
             // forward-scatter HG lobe (backlit flare): peaks when the sun is
             // behind the ring from the viewer (dot(rdS, uBodySun[i]) → 1)
             float ph = dot(rdS, uBodySun[i]);
-            float g = uRingFsG, gd = 1.0 + g * g - 2.0 * g * ph;
+            float g = uRingFsG[i], gd = 1.0 + g * g - 2.0 * g * ph;
             float hgL = (1.0 - g * g) / max(gd * sqrt(max(gd, 1e-4)), 1e-3);
             // planet shadow on the ring (target frame, units of D): parallel-ray
             // cylinder — shadowed on the anti-sun side within the planet radius
             vec3 qT = vec3(dot(uBodyR0[i], rvec), dot(uBodyR1[i], rvec), dot(uBodyR2[i], rvec));
             vec3 sT = normalize(vec3(dot(uBodyR0[i], uBodySun[i]), dot(uBodyR1[i], uBodySun[i]), dot(uBodyR2[i], uBodySun[i])));
             float qs = dot(qT, sT);
-            float lit = qs < 0.0 ? smoothstep(uRingRp * 0.96, uRingRp * 1.10, length(qT - qs * sT)) : 1.0;
+            float lit = qs < 0.0 ? smoothstep(uRingRp[i] * 0.96, uRingRp[i] * 1.10, length(qT - qs * sT)) : 1.0;
             // front/back vs the planet: occluded where the ring passes BEHIND the
             // sphere near-surface (compare τ to the sphere depth /D — exact R/D ratio)
             float frontVis = 1.0;
             if (bAng < uBodyAngR[i]) {
               float sb = sin(bAng);
-              float dsph = cos(bAng) - sqrt(max(uRingRp * uRingRp - sb * sb, 0.0));
+              float dsph = cos(bAng) - sqrt(max(uRingRp[i] * uRingRp[i] - sb * sb, 0.0));
               frontVis = tau < dsph ? 1.0 : 0.0;
             }
-            col += frontVis * trans * uBodyCol[i] * uRingCol * (0.4 + 0.22 * hgL) * lit * clamp(opac, 0.0, 1.0);
+            col += frontVis * trans * uBodyCol[i] * uRingCol[i] * (0.4 + 0.22 * hgL) * lit * clamp(opac, 0.0, 1.0);
           }
         }
       }

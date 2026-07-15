@@ -34,7 +34,15 @@ function djb2(s) {
 // the global entry is identical — they must share one build.
 export function globalFor(body, p) {
   const prefix = prefixOf(body, p);
-  const key = djb2(JSON.stringify({ R: body.R, sea: body.seaLevel, prefix, p }));
+  // Context insolation writes only the ice/climate field; the global pass samples
+  // prefix HEIGHTS. Excluding that non-height input keeps an orbit-only climate
+  // edit from needlessly rebuilding the ~3 s drainage grid while preserving the
+  // actual context delta in ordinary tile bakes.
+  const heightPrefix = prefix.map((q) => {
+    if (q.type !== 'context' || !q.insolation) return q;
+    const copy = { ...q }; delete copy.insolation; return copy;
+  });
+  const key = djb2(JSON.stringify({ R: body.R, sea: body.seaLevel, prefix: heightPrefix, p }));
   let g = CACHE.get(key);
   if (!g) {
     g = buildGlobal(body, p, prefix);

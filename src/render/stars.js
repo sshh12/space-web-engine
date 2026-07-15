@@ -82,8 +82,8 @@ const STAR_VERT = /* glsl */ `
   __COMMON__
   uniform vec3 uB2I0, uB2I1, uB2I2; // body-fixed -> inertial columns (sky pass twins)
   uniform int  uNumBodies;          // celestial occlusion (round 9): companion discs
-  uniform vec3 uBodyDir[4];         // body-fixed directions to companions (sky twins)
-  uniform float uBodyAngR[4];       // their angular radii
+  uniform vec3 uBodyDir[8];         // body-fixed directions to companions (sky twins)
+  uniform float uBodyAngR[8];       // their angular radii
   uniform sampler2D uSceneDepth;    // terrain occlusion (round 11): the scene
   uniform vec4 uStarVp;             // target's depth, tapped at this star's own
   uniform vec2 uRtSize;             // pixel — boulders/relief finally cull stars
@@ -109,7 +109,7 @@ const STAR_VERT = /* glsl */ `
     // frame (uBodyDir/uSunDir are the sky pass's own twins), so it is exact at
     // the disc limb the sky pass draws.
     if (acos(clamp(dot(rd, uSunDir), -1.0, 1.0)) < uSunAngR) occ = 0.0;
-    for (int i = 0; i < 4; i++) {
+    for (int i = 0; i < 8; i++) {
       if (i >= uNumBodies) break;
       if (acos(clamp(dot(rd, uBodyDir[i]), -1.0, 1.0)) < uBodyAngR[i]) occ = 0.0;
     }
@@ -196,4 +196,85 @@ export function makeStarPoints(shared, skyUniforms, withCommonFn, scatterText, a
   const pts = new THREE.Points(g, mat);
   pts.frustumCulled = false;
   return pts;
+}
+
+// Phase C all-bodies ladder rung. Resolved companions are removed from this
+// dynamic buffer; every remaining system member is a PSF point with the same
+// body/sun/terrain occlusion tests as catalog stars. `flux` is the shared
+// discIntegratedFlux hand-down, so slot pressure changes representation only.
+const BODY_POINT_VERT = /* glsl */ `
+  #include <common>
+  #include <logdepthbuf_pars_vertex>
+  __COMMON__
+  uniform int uNumBodies;
+  uniform vec3 uBodyDir[8];
+  uniform float uBodyAngR[8];
+  uniform sampler2D uSceneDepth;
+  uniform vec4 uStarVp;
+  uniform vec2 uRtSize;
+  uniform float uStarOccR;
+  attribute float aFlux;
+  attribute vec3 aColor;
+  attribute float aActive;
+  varying vec3 vCol;
+  void main(){
+    vec3 rd = normalize(position);
+    float occ = aActive;
+    vec2 pg = raySphere(uCamPos, rd, uStarOccR);
+    if (pg.x > 0.0 && pg.y > 0.0) occ = 0.0;
+    if (acos(clamp(dot(rd, uSunDir), -1.0, 1.0)) < uSunAngR) occ = 0.0;
+    for (int i = 0; i < 8; i++) {
+      if (i >= uNumBodies) break;
+      if (acos(clamp(dot(rd, uBodyDir[i]), -1.0, 1.0)) < uBodyAngR[i]) occ = 0.0;
+    }
+    ${'__SCATTER__'}
+    vCol = aColor * aFlux * trans * occ;
+    vec4 wp = vec4(rd * 3.0e7, 1.0);
+    gl_Position = projectionMatrix * viewMatrix * wp;
+    if (gl_Position.w > 0.0) {
+      vec2 uv = (uStarVp.xy + (gl_Position.xy / gl_Position.w * 0.5 + 0.5) * uStarVp.zw) / uRtSize;
+      if (uv == clamp(uv, 0.0, 1.0) && texture2D(uSceneDepth, uv).r < 0.999999) vCol = vec3(0.0);
+    }
+    float lum = max(vCol.r, max(vCol.g, vCol.b)) * uExposure;
+    gl_PointSize = clamp(3.0 + 0.9 * log2(1.0 + lum * 30.0), 3.0, 8.0);
+    #include <logdepthbuf_vertex>
+  }
+`;
+
+export function makeBodyPoints(shared, skyUniforms, withCommonFn, scatterText, atmSteps, depthUniforms = {}, maxBodies = 64) {
+  const pos = new Float32Array(maxBodies * 3);
+  const col = new Float32Array(maxBodies * 3);
+  const flux = new Float32Array(maxBodies);
+  const active = new Float32Array(maxBodies);
+  const g = new THREE.BufferGeometry();
+  g.setAttribute('position', new THREE.BufferAttribute(pos, 3).setUsage(THREE.DynamicDrawUsage));
+  g.setAttribute('aColor', new THREE.BufferAttribute(col, 3).setUsage(THREE.DynamicDrawUsage));
+  g.setAttribute('aFlux', new THREE.BufferAttribute(flux, 1).setUsage(THREE.DynamicDrawUsage));
+  g.setAttribute('aActive', new THREE.BufferAttribute(active, 1).setUsage(THREE.DynamicDrawUsage));
+  g.setDrawRange(0, 0);
+  g.boundingSphere = new THREE.Sphere(new THREE.Vector3(), 3.1e7);
+  const vert = withCommonFn(BODY_POINT_VERT, atmSteps, { vertex: true }).replace('__SCATTER__', scatterText);
+  const mat = new THREE.ShaderMaterial({
+    vertexShader: vert, fragmentShader: STAR_FRAG,
+    uniforms: { ...shared, uNumBodies: skyUniforms.uNumBodies, uBodyDir: skyUniforms.uBodyDir,
+      uBodyAngR: skyUniforms.uBodyAngR, ...depthUniforms },
+    transparent: true, blending: THREE.AdditiveBlending, depthWrite: false, depthTest: false,
+  });
+  const points = new THREE.Points(g, mat);
+  points.frustumCulled = false;
+  return {
+    points,
+    update(entries) {
+      const n = Math.min(entries.length, maxBodies);
+      for (let i = 0; i < n; i++) {
+        const e = entries[i];
+        pos.set(e.dirBF, i * 3); col.set(e.color, i * 3);
+        flux[i] = e.flux; active[i] = 1;
+      }
+      g.setDrawRange(0, n);
+      for (const name of ['position', 'aColor', 'aFlux', 'aActive']) g.getAttribute(name).needsUpdate = true;
+      return n;
+    },
+    dispose() { g.dispose(); mat.dispose(); },
+  };
 }

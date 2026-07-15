@@ -354,6 +354,105 @@ export function alphaMeanLit(body, rgba, L, t, dirToReceiver, dirToSun) {
 export const discAlpha = (deck, cov) =>
   1 - Math.exp(-2 * (deck.sigmaK ?? 0.003) * cov * deck.thickM);
 
+// ---------------------------------------------------------------------------
+// Phase W above-band representation (round 24). Above the declared clouds band
+// the deck renders its closed-form TIME-AVERAGE — of the ALPHA law, never of
+// coverage (alpha is concave in cov, so alpha(mean cov) overshoots mean(alpha):
+// the round-15 planetshine Jensen lesson, now a [time-field] law). The mean is
+// shipped as an EQUIVALENT COVERAGE cov* = A⁻¹(E_t[A(cov)]) packed into BOTH
+// keyframe slots (R=B, G=A), so the unchanged GLSL/JS samplers — whose frac
+// lerp becomes the identity — render the exact analytic mean through the same
+// alpha law. Drifting decks additionally average over the drift ring (a fixed
+// ground point sees its whole latitude circle), making the raster
+// rotation-invariant, so a zeroed drift phase is exact, not approximate.
+
+// invert the disc alpha law: the coverage whose alpha equals meanAlpha.
+export const equivalentMeanCov = (deck, meanAlpha) => {
+  const a = 2 * (deck.sigmaK ?? 0.003) * deck.thickM;
+  return clamp(-Math.log(Math.max(1 - meanAlpha, 1e-12)) / a, 0, 1);
+};
+
+// the time-average spans one keyframe-evolution correlation block (MEAN_BLOCK_K
+// keyframes ≈ 2 world-days at keyframeH 6) anchored at the epoch's block, so
+// seasonal decks (dust storms, polar hoods) keep their epoch-local season — a
+// capture at month/s shows THIS season's mean, not a washed annual gray.
+export const MEAN_BLOCK_K = 8;
+export const meanBlockOf = (body, t) => Math.floor(cloudKeyOf(body, t).k / MEAN_BLOCK_K);
+
+// E over frac of alpha(lerp(c0, c1, f)): 2-point Gauss on [0,1] — fixed
+// deterministic quadrature (the solver-policy law applied to an integral).
+const GAUSS_F = [0.5 - 0.5 / Math.sqrt(3), 0.5 + 0.5 / Math.sqrt(3)];
+
+export function makeCloudMeanRaster(body, block, moistAt = null, seasonAt = null) {
+  const decks = body.clouds?.decks ?? [];
+  const n = Math.min(decks.length, MAX_DECKS);
+  const rgba = new Uint8Array(n * CLOUD_W * CLOUD_H * 4);
+  if (!n) return { rgba, decks: 0, block };
+  const kA = block * MEAN_BLOCK_K;
+  const seed0 = body.clouds.seed ?? 71;
+  // coarse evaluation grid (the mean field is smooth by construction — fbm
+  // averaged over a whole evolution block), bilinearly upsampled to the atlas.
+  const W2 = CLOUD_W >> 2, H2 = CLOUD_H >> 2;
+  const d = [0, 0, 0];
+  const covK = new Float64Array(MEAN_BLOCK_K + 1);
+  const seasons = [];
+  for (let k = kA; k <= kA + MEAN_BLOCK_K; k++) seasons.push(seasonAt ? seasonAt(k) : null);
+  for (let L = 0; L < n; L++) {
+    const deck = decks[L];
+    const seed = (seed0 + L * 101) | 0;
+    const meanA = new Float64Array(W2 * H2);
+    const meanT = new Float64Array(W2 * H2);
+    for (let j = 0; j < H2; j++) {
+      for (let i = 0; i < W2; i++) {
+        // coarse texel center mapped onto the fine texel-direction convention
+        texelDir((i + 0.5) * 4 - 0.5, (j + 0.5) * 4 - 0.5, d);
+        let tSum = 0;
+        for (let k = 0; k <= MEAN_BLOCK_K; k++) {
+          covK[k] = covAt(d, deck, seed, kA + k, moistAt, seasons[k]);
+          const w = k === 0 || k === MEAN_BLOCK_K ? 0.5 : 1;
+          tSum += w * typeAt(d, deck, seed, kA + k);
+        }
+        let aSum = 0;
+        for (let k = 0; k < MEAN_BLOCK_K; k++) {
+          for (const f of GAUSS_F) aSum += discAlpha(deck, covK[k] * (1 - f) + covK[k + 1] * f);
+        }
+        const o = j * W2 + i;
+        meanA[o] = aSum / (MEAN_BLOCK_K * GAUSS_F.length);
+        meanT[o] = tSum / MEAN_BLOCK_K;
+      }
+    }
+    // drift-ring average: the time-mean at a fixed point of a drifting deck is
+    // the lon-ring mean of alpha (linear in alpha, THEN inverted to cov*).
+    if ((deck.driftDegPerDay ?? 0) !== 0) {
+      for (let j = 0; j < H2; j++) {
+        let aRow = 0, tRow = 0;
+        for (let i = 0; i < W2; i++) { aRow += meanA[j * W2 + i]; tRow += meanT[j * W2 + i]; }
+        aRow /= W2; tRow /= W2;
+        for (let i = 0; i < W2; i++) { meanA[j * W2 + i] = aRow; meanT[j * W2 + i] = tRow; }
+      }
+    }
+    // bilinear upsample in ALPHA space (the calibrated quantity), invert per
+    // fine texel, pack both keyframe slots identically (frac-lerp = identity).
+    const base = L * CLOUD_W * CLOUD_H * 4;
+    for (let j = 0; j < CLOUD_H; j++) {
+      const y = clamp(j / 4 - 0.375, 0, H2 - 1);
+      const y0 = Math.floor(y), y1 = Math.min(y0 + 1, H2 - 1), fy = y - y0;
+      for (let i = 0; i < CLOUD_W; i++) {
+        let x = i / 4 - 0.375;
+        x -= Math.floor(x / W2) * W2; // lon wraps
+        const x0 = Math.floor(x) % W2, x1 = (x0 + 1) % W2, fx = x - Math.floor(x);
+        const blerp = (g) => (g[y0 * W2 + x0] * (1 - fx) + g[y0 * W2 + x1] * fx) * (1 - fy)
+          + (g[y1 * W2 + x0] * (1 - fx) + g[y1 * W2 + x1] * fx) * fy;
+        const cov = Math.round(equivalentMeanCov(deck, blerp(meanA)) * 255);
+        const typ = Math.round(clamp(blerp(meanT), 0, 1) * 255);
+        const o = base + (j * CLOUD_W + i) * 4;
+        rgba[o] = cov; rgba[o + 1] = typ; rgba[o + 2] = cov; rgba[o + 3] = typ;
+      }
+    }
+  }
+  return { rgba, decks: n, block };
+}
+
 // validation used by tests and tiles/recipe consumers: the panel-F2b bound.
 export function assertCloudRecipe(body) {
   const decks = body.clouds?.decks ?? [];

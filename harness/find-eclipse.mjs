@@ -4,12 +4,12 @@
 // the same scan two machines run finds the same eclipse.
 import { SYSTEM, bodyById } from '../src/core/recipe.js';
 import { ephemeris } from '../src/core/frames.js';
+import { legacyViewsAtEpoch } from '../src/core/time.js';
 
 const tellus = bodyById('tellus');
 const luna = bodyById('luna');
 
 function scan(body, occId, label) {
-  const spinSec = body.spin.periodH * 3600;
   let best = null;
   for (let i = 0; i < 200000; i++) {
     const t = i * 300; // 5-min steps over ~2 years
@@ -22,8 +22,7 @@ function scan(body, occId, label) {
     if (sep < lim && (!best || sep < best.sep)) {
       // __shot composes t = season*orbitSec + tday*spinSec — subtract the day
       // fraction from season or the spec lands hours off the alignment
-      const tday = (t % spinSec) / spinSec;
-      const season = (t - tday * spinSec) / (body.orbit.periodDays * 86400);
+      const { season, tday } = legacyViewsAtEpoch(body, t);
       const lat = (Math.asin(o.dirBF[1]) * 180) / Math.PI;
       const lon = (Math.atan2(o.dirBF[2], o.dirBF[0]) * 180) / Math.PI;
       best = { sep, t, season: +season.toFixed(6), tday: +tday.toFixed(6), lat: +lat.toFixed(2), lon: +lon.toFixed(2), angO: o.angRadius, angS: eph.sunAngRadius };

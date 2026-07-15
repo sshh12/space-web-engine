@@ -1,0 +1,22 @@
+{
+ "provenance": {
+  "backend": "gpu",
+  "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5090 (0x00002B85) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+  "fast": true,
+  "dpr": 1,
+  "seed": 20260712,
+  "commit": "73ae4d8",
+  "system": { "id": "demo-system", "recipeHash": "6bd998a2" },
+  "promotedFrom": "harness/bench.mjs --controls-only"
+ },
+ "metrics": [
+  { "file": "control-20260712-0.png", "tier": "control", "spec_slope": -1.849, "grad_kurtosis": 285.189, "lum_mean": 0.003, "shadow_frac": 0.6444 },
+  { "file": "control-20260712-1.png", "tier": "control", "spec_slope": -3.254, "grad_kurtosis": 131.817, "lum_mean": 0.1019, "shadow_frac": 0.014 },
+  { "file": "control-20260712-2.png", "tier": "control", "spec_slope": -2.915, "grad_kurtosis": 654.187, "lum_mean": 0.4712, "shadow_frac": 0.4073 },
+  { "file": "control-20260712-3.png", "tier": "control", "spec_slope": -3.187, "grad_kurtosis": 1.505, "lum_mean": 0.0686, "shadow_frac": 0.3402 },
+  { "file": "control-20260712-4.png", "tier": "control", "spec_slope": -2.726, "grad_kurtosis": 113.964, "lum_mean": 0.2956, "shadow_frac": 0.4682 },
+  { "file": "control-20260712-5.png", "tier": "control", "spec_slope": -3.154, "grad_kurtosis": 616.336, "lum_mean": 0.0873, "shadow_frac": 0.9085 },
+  { "file": "control-20260712-6.png", "tier": "control", "spec_slope": -2.218, "grad_kurtosis": 3.246, "lum_mean": 0.0093, "shadow_frac": 0.0696 },
+  { "file": "control-20260712-7.png", "tier": "control", "spec_slope": -2.343, "grad_kurtosis": 184.741, "lum_mean": 0.1899, "shadow_frac": 0.6882 }
+ ]
+}

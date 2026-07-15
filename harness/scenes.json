@@ -1122,6 +1122,28 @@
    "phaseDeg": 55,
    "pitch": 74,
    "waitMs": 300000
-  }
+  },
+  { "id": 78, "name": "cinis-perihelion", "tier": "icon", "system": "sol-system", "body": "cinis", "disk": true, "lat": 8, "lon": 110, "alt": 5000000, "epochS": 0, "note": "Phase S Mercury-family eccentricity and lobate-scarp data anchor." },
+  { "id": 79, "name": "timor-figure", "tier": "icon", "system": "sol-system", "body": "timor", "disk": true, "lat": 10, "lon": 20, "alt": 35000, "epochS": 0 },
+  { "id": 80, "name": "pavor-figure", "tier": "icon", "system": "sol-system", "body": "pavor", "disk": true, "lat": 12, "lon": 40, "alt": 24000, "epochS": 0 },
+  { "id": 81, "name": "iovis-family", "tier": "icon", "system": "sol-system", "body": "sulcus", "lat": 5, "lon": 155, "alt": 1200000, "lookAt": "iovis", "epochS": 0, "fov": 42, "note": "Galilean-analog family portrait from Sulcus; the Laplace group is live data." },
+  { "id": 82, "name": "fornax-sulfur", "tier": "icon", "system": "sol-system", "body": "fornax", "disk": true, "lat": 0, "lon": 30, "alt": 3500000, "epochS": 0 },
+  { "id": 83, "name": "sulcus-grooves", "tier": "icon", "system": "sol-system", "body": "sulcus", "disk": true, "lat": 8, "lon": 155, "alt": 5000000, "epochS": 0 },
+  { "id": 84, "name": "vetus-craters", "tier": "icon", "system": "sol-system", "body": "vetus", "disk": true, "lat": 15, "lon": 30, "alt": 4500000, "epochS": 0 },
+  { "id": 85, "name": "ring-span", "tier": "icon", "system": "sol-system", "body": "candor", "lat": -25, "lon": 275, "alt": 180000, "lookAt": "saturn", "epochS": 0, "fov": 48 },
+  { "id": 86, "name": "rhea-ice", "tier": "icon", "system": "sol-system", "body": "rhea", "disk": true, "lat": 10, "lon": 20, "alt": 1500000, "epochS": 0 },
+  { "id": 87, "name": "ianus-two-tone", "tier": "icon", "system": "sol-system", "body": "ianus", "disk": true, "lat": 8, "lon": 55, "alt": 1400000, "epochS": 0 },
+  { "id": 88, "name": "caelus-sideways", "tier": "icon", "system": "sol-system", "body": "ruina", "lat": -4.34, "lon": -160.15, "alt": 100000, "lookAt": "caelus", "fov": 40, "epochS": 84436.2200379111, "note": "Parent-facing Ruina pose at maximum 4.34-degree ring opening resolves Caelus's 98-degree pole and faint ring without the edge-on conditioning floor." },
+  { "id": 89, "name": "ruina-chaos", "tier": "icon", "system": "sol-system", "body": "ruina", "disk": true, "lat": 10, "lon": 30, "alt": 520000, "epochS": 0 },
+  { "id": 90, "name": "aeria-ice", "tier": "icon", "system": "sol-system", "body": "aeria", "disk": true, "lat": 10, "lon": 30, "alt": 1300000, "epochS": 0 },
+  { "id": 91, "name": "umbra-dark", "tier": "icon", "system": "sol-system", "body": "umbra", "disk": true, "lat": 10, "lon": 30, "alt": 1300000, "epochS": 0 },
+  { "id": 92, "name": "titania-ice", "tier": "icon", "system": "sol-system", "body": "titania", "disk": true, "lat": 10, "lon": 30, "alt": 1750000, "epochS": 0 },
+  { "id": 93, "name": "oberon-ice", "tier": "icon", "system": "sol-system", "body": "oberon", "disk": true, "lat": 10, "lon": 30, "alt": 1700000, "epochS": 0 },
+  { "id": 94, "name": "pontus-storm", "tier": "icon", "system": "sol-system", "body": "errans", "lat": 14.63, "lon": -40.06, "alt": 500000, "lookAt": "pontus", "fov": 35, "epochS": 0, "note": "Parent-facing Errans pose exercises Pontus through the live giant-band and storm path." },
+  { "id": 95, "name": "errans-retrograde", "tier": "icon", "system": "sol-system", "body": "errans", "disk": true, "lat": 5, "lon": 145, "alt": 2600000, "epochS": 0 },
+  { "id": 96, "name": "ordo-bright-spots", "tier": "icon", "system": "sol-system", "body": "ordo", "disk": true, "lat": 15, "lon": 20, "alt": 950000, "phaseDeg": 18, "meter": "center" },
+  { "id": 97, "name": "pluto-navita-dance", "tier": "icon", "system": "sol-system", "body": "navita", "lat": 45, "lon": 20, "alt": 350000, "lookAt": "pluto", "epochS": 0, "fov": 50, "note": "Mutual Pluto-Charon analog around the authored barycenter; Navita carries the polar tholin knob." },
+  { "id": 98, "name": "cinis-day", "tier": "icon", "system": "sol-system", "body": "cinis", "lat": 8, "lon": 110, "alt": 90000, "pitch": 12, "epochS": 0, "warp": 86400, "note": "Phase W showcase: the 3:2 lockRatio makes the solar day two cinis years (K3); at the day/s detent a full sunrise-to-sunrise is ~176 real seconds. Declared warp pins the above-band representation set for the frozen capture." },
+  { "id": 99, "name": "perihelion-seasons", "tier": "icon", "system": "sol-system", "body": "rubra", "disk": true, "lat": -10, "lon": 40, "alt": 9000000, "epochS": 45245183, "warp": 2629800, "note": "Phase W showcase: epoch solved for the storm deck's Ls 4.71 (true-anomaly keyed since Phase S re-keying); declared month/s warp renders the Jensen-honest season-local cloud mean — the dusty pall as a time-average, not a strobe." }
  ]
 }

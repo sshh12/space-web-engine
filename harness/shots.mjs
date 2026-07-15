@@ -23,6 +23,9 @@ import { resolve, join, extname, normalize } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { homedir, cpus } from 'node:os';
 import { execSync } from 'node:child_process';
+import { SYSTEM } from '../src/core/recipe.js';
+import { SOL_SYSTEM } from '../src/core/sol.js';
+import { systemIdentity } from '../src/core/system.js';
 
 export const ROOT = resolve(fileURLToPath(import.meta.url), '../..');
 
@@ -122,14 +125,32 @@ export async function renderShots(input, opts = {}) {
   const {
     parallel = 1, out = resolve(ROOT, 'harness/out'), page: pagePath = 'apps/inspector.html',
     fast = true, retries = 1, seed = null, w = 1280, h = 780, dpr = 1, recycle = 12, quiet = false,
-    profile = false, trace = false,
+    profile = false, trace = false, system = null,
   } = opts;
   const shots = toShots(input);
   const stills = resolve(out, 'stills');
   mkdirSync(stills, { recursive: true });
 
+  // Round 26 (rule-3 residue from round 25): deadlines are CONTENTION-AWARE.
+  // N concurrent pages share the CPU-bound bake workers, so wall-clock inflates
+  // roughly with the pool width: full-sweep boots measured 126–219 s at 8 pages
+  // vs ~20 s solo, and crater-rim-walk (6–12 s solo) blew the flat 300 s settle
+  // ceiling mid-sweep. Deadlines exist to FAIL LOUD, not to pace healthy runs —
+  // "better a slow bench than a lying one" — so every boot/settle deadline
+  // scales with the pool width and the protocol timeout is raised to cover the
+  // longest blocking __shot evaluate.
+  const poolN = Math.max(1, parallel);
+  const contention = 1 + 0.75 * (poolN - 1);
+  const scaleMs = (ms) => Math.round(ms * contention);
+  const maxAuthoredWaitMs = Math.max(150000, ...shots.flatMap((s) =>
+    ('frames' in s ? s.frames : [s.spec]).map((sp) => sp?.waitMs ?? 0)));
+
   const server = opts.url ? null : await startServer();
-  const url = opts.url || `${server.url}/${pagePath}${fast ? '?fast=1' : ''}`;
+  const selectedSystem = system === 'sol' || system === 'sol-system' ? SOL_SYSTEM : (system?.bodies ? system : SYSTEM);
+  const query = new URLSearchParams();
+  if (fast) query.set('fast', '1');
+  if (selectedSystem.id === SOL_SYSTEM.id) query.set('system', 'sol');
+  const url = opts.url || `${server.url}/${pagePath}${query.size ? `?${query}` : ''}`;
   const backend = resolveBackend(opts.backend);
   const log = (...a) => { if (!quiet) console.log(...a); };
 
@@ -140,10 +161,10 @@ export async function renderShots(input, opts = {}) {
   // renderer string (filled after boot) so a GPU run and a CPU run never get compared.
   const gpuArgs = ['--use-gl=angle', '--ignore-gpu-blocklist', '--enable-gpu-rasterization'];
   const swArgs = ['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist'];
-  const provenance = { backend, renderer: null, fast, dpr, seed, commit: gitCommit() };
+  const provenance = { backend, renderer: null, fast, dpr, seed, commit: gitCommit(), system: systemIdentity(selectedSystem) };
 
   const launch = {
-    headless: 'new', protocolTimeout: 420000,
+    headless: 'new', protocolTimeout: Math.max(420000, scaleMs(maxAuthoredWaitMs) + 120000),
     args: [...(backend === 'swiftshader' ? swArgs : gpuArgs),
       '--no-sandbox', `--window-size=${w},${h}`],
   };
@@ -173,8 +194,8 @@ export async function renderShots(input, opts = {}) {
         const t0 = Date.now();
         p = await browser.newPage();
         await p.setViewport({ width: w, height: h, deviceScaleFactor: dpr });
-        await p.goto(url, { waitUntil: 'networkidle0', timeout: 120000 });
-        await p.waitForFunction(() => window.__ready && window.__ready(), { timeout: 300000, polling: 250 });
+        await p.goto(url, { waitUntil: 'networkidle0', timeout: scaleMs(120000) });
+        await p.waitForFunction(() => window.__ready && window.__ready(), { timeout: scaleMs(300000), polling: 250 });
         if (provenance.renderer == null) {
           provenance.renderer = await p.evaluate(() => {
             const gl = document.createElement('canvas').getContext('webgl2') || document.createElement('canvas').getContext('webgl');
@@ -183,6 +204,8 @@ export async function renderShots(input, opts = {}) {
           }).catch(() => 'unknown');
           if (!quiet) log(`  [backend ${backend}: ${provenance.renderer}]`);
         }
+        const loadedSystem = await p.evaluate(() => window.__system?.());
+        if (loadedSystem) provenance.system = loadedSystem;
         if (!quiet) log(`  [boot ${((Date.now() - t0) / 1000).toFixed(0)}s]`);
         return p;
       } catch (e) {
@@ -200,14 +223,17 @@ export async function renderShots(input, opts = {}) {
   //    waterfall — a timeline of the pending counts (tiles/rocks/forms/clouds/disc) so
   //    an agent can see WHERE the settle time went, not just the total. Optional Chrome
   //    trace (page.tracing) writes a Perfetto file for the deep main-thread/worker view.
-  async function capture(page, spec, file) {
+  async function capture(page, spec, file, input = null) {
     if (trace) await page.tracing.start({ path: file.replace(/\.png$/, '.trace.json'), screenshots: false });
+    // the engine-side settle deadline rides the spec; scale it (authored or
+    // default) by the measured pool contention before it crosses the wire
+    spec = { ...spec, waitMs: scaleMs(spec.waitMs ?? 150000) };
     let out;
     if (profile) {
       const t0 = Date.now();
       await page.evaluate((s) => { window.__shot(s); }, spec);        // fire, don't await the settle
       const timeline = [];
-      const deadline = spec.waitMs ?? 240000;
+      const deadline = Math.max(spec.waitMs, scaleMs(240000));
       for (;;) {
         const s = await page.evaluate(() => (window.__stream ? window.__stream() : null));
         if (!s) break;
@@ -221,10 +247,13 @@ export async function renderShots(input, opts = {}) {
       out = { settled: !!last && last.stable > 6, ms: last ? last.t : null, errors, timeline };
     } else {
       const res = await page.evaluate((s) => window.__shot(s), spec);
+      if (input?.length) await page.evaluate((steps) => window.__input(steps), input);
       await new Promise((r) => setTimeout(r, 250));
       await page.screenshot({ path: file });
       const errors = await page.evaluate(() => (window.__pageErrors ?? []).splice(0));
-      out = { settled: res ? res.settled !== false : true, ms: res ? res.ms : null, errors };
+      const captureSpec = await page.evaluate(() => window.__capture?.());
+      const stream = await page.evaluate(() => window.__stream?.());
+      out = { settled: res ? res.settled !== false : true, ms: res ? res.ms : null, errors, captureSpec, stream };
     }
     if (trace) await page.tracing.stop();
     return out;
@@ -232,8 +261,9 @@ export async function renderShots(input, opts = {}) {
 
   const records = new Array(shots.length);
   let qi = 0;
+  const withProvenance = (r) => ({ ...r, provenance: r.system ? { ...provenance, system: r.system } : provenance });
   const flush = () => writeFileSync(resolve(out, 'records.json'),
-    JSON.stringify(records.filter(Boolean).map((r) => ({ ...r, provenance })), null, 1));
+    JSON.stringify(records.filter(Boolean).map(withProvenance), null, 1));
 
   async function worker(startDelay) {
     // Stagger cold boots: N pages each bake the default view before __ready, so
@@ -250,20 +280,32 @@ export async function renderShots(input, opts = {}) {
       const rec = { name: shot.name, ...('frames' in shot ? { pngs: [] } : { png: '' }), settled: true, ms: 0, errors: [] };
       try {
         if ('frames' in shot) {
+          rec.streams = [];
           for (let f = 0; f < shot.frames.length; f++) {
             const file = resolve(stills, `${shot.name}-${String(f).padStart(3, '0')}.png`);
-            const c = await capture(page, shot.frames[f], file);
+            const c = await capture(page, shot.frames[f], file, shot.input);
             rec.pngs.push(file); rec.settled &&= c.settled; rec.errors.push(...c.errors);
+            rec.streams.push(c.stream ?? null);
           }
         } else {
           const file = resolve(stills, shot.name + '.png');
-          let c = await capture(page, shot.spec, file);
+          const systemStarted = Date.now();
+          if (shot.system) rec.system = await page.evaluate((system) => window.__setSystem(system), shot.system);
+          let c = await capture(page, shot.spec, file, shot.input);
           for (let r = 0; !c.settled && r < retries; r++) {
             log(`  UNSETTLED ${shot.name} (${c.ms} ms) — retry on fresh page`);
             await page.close(); page = await freshPage(); since = 0;
-            c = await capture(page, shot.spec, file);
+            if (shot.system) rec.system = await page.evaluate((system) => window.__setSystem(system), shot.system);
+            c = await capture(page, shot.spec, file, shot.input);
+          }
+          if (shot.waitAllDiscs) {
+            await page.waitForFunction(() => window.__stream?.().disc === 0, { timeout: scaleMs(60000), polling: 100 });
+            rec.allDiscsMs = Date.now() - systemStarted;
+            c.stream = await page.evaluate(() => window.__stream?.());
           }
           rec.png = file; rec.settled = c.settled; rec.ms = c.ms; rec.errors = c.errors;
+          if (c.captureSpec) rec.captureSpec = c.captureSpec;
+          if (c.stream) rec.stream = c.stream;
           if (c.timeline) rec.profile = c.timeline;
         }
       } catch (e) {
@@ -289,7 +331,7 @@ export async function renderShots(input, opts = {}) {
   await browser.close();
   if (server) await server.close();
 
-  const out2 = records.filter(Boolean).map((r) => ({ ...r, provenance }));
+  const out2 = records.filter(Boolean).map(withProvenance);
   const broken = out2.filter((r) => r.errors.length).length;
   const unsettled = out2.filter((r) => !r.settled).length;
   if (broken) console.error(`\n${broken} shot(s) had PAGE ERRORS — their stills must not be scored`);

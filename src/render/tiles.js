@@ -120,9 +120,10 @@ function arrayTex8(h) {
 const dotNadir = (c, dir, r) => (c[0] * dir[0] + c[1] * dir[1] + c[2] * dir[2]) / r;
 
 export class PlanetTiles {
-  constructor(body, worker, shared, { atmSteps = 14 } = {}) {
+  constructor(body, worker, shared, { atmSteps = 14, generation = 0, assetPack = null } = {}) {
     buildShared(); buildOceanShared();
     this.body = body;
+    this.systemGeneration = generation;
     this.worker = worker;
     this.shared = shared;          // uniform value objects shared by every material
     this.atmSteps = atmSteps;
@@ -226,7 +227,7 @@ export class PlanetTiles {
     // set, deterministic from the recipe; shared across every tile's instances
     this.rockGeoms = null; this.rockMeta = null; this.rockMapTex = null;
     if (body.rocks) {
-      const rset = makeRockSet(body.rocks);
+      const rset = assetPack?.rocks?.set ?? makeRockSet(body.rocks);
       this.rockMeta = rset.meta;
       this.rockGeoms = rset.meshes.map((av) => av.map((lods) => lods.map((m) => {
         const g = new THREE.BufferGeometry();
@@ -238,7 +239,7 @@ export class PlanetTiles {
       })));
       // limit-surface normal + cavity maps (4b residue): one octahedral layer
       // per (archetype, variant) — facet interiors shade with the true sculpt
-      const maps = makeRockMaps(body.rocks);
+      const maps = assetPack?.rocks?.maps ?? makeRockMaps(body.rocks);
       const mt = new THREE.DataArrayTexture(maps.data, maps.size, maps.size, maps.layers);
       mt.format = THREE.RGBAFormat;
       mt.type = THREE.UnsignedByteType;
@@ -257,7 +258,7 @@ export class PlanetTiles {
     // (same owner-atlas lighting convention as rocks — one lighting answer)
     this.formGeoms = null; this.formMeta = null; this.formHullTex = null;
     if (body.formations) {
-      const fset = makeFormationSet(body.formations);
+      const fset = assetPack?.formations?.set ?? makeFormationSet(body.formations);
       this.formMeta = fset.meta;
       this.formGeoms = fset.meshes.map((av) => av.map((lods) => lods.map((m) => {
         const g = new THREE.BufferGeometry();
@@ -327,7 +328,7 @@ export class PlanetTiles {
     const k = this.key(f, l, x, y);
     if (this.cache.has(k) || this.pending.has(k)) return;
     this.pending.add(k);
-    this.worker.postMessage({ bodyId: this.body.id, face: f, level: l, x, y, gen: this.gen });
+    this.worker.postMessage({ bodyId: this.body.id, face: f, level: l, x, y, gen: this.gen, generation: this.systemGeneration });
   }
 
   // hot recipe reload (Phase T): swap the process list and drop only the tiles
@@ -376,7 +377,7 @@ export class PlanetTiles {
     const contR = processes.find((p) => p.type === 'continents');
     this.swellAxis = lowDegreeAxes(contR ? contR.seed : 0).a2;
     this.r13 = this.computeR13Look();
-    this.worker.postMessage({ type: 'reload', bodyId: this.body.id, processes });
+    this.worker.postMessage({ type: 'reload', bodyId: this.body.id, processes, generation: this.systemGeneration });
     return this.gen;
   }
 
@@ -391,6 +392,7 @@ export class PlanetTiles {
   }
 
   onBaked(m) {
+    if (m.generation !== this.systemGeneration) return;
     // round 17: a figure bake assert died in the worker — surface it LOUDLY
     // (an uncaught worker throw leaves the tile pending forever: settle-stall)
     if (m.type === 'bakeerror') {
@@ -1723,4 +1725,3 @@ export class PlanetTiles {
     return 0;
   }
 }
-

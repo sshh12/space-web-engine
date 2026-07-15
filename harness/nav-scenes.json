@@ -1,0 +1,14 @@
+{
+  "scenes": [
+    { "name": "system-sol-starter", "tier": "icon", "host": "star", "target": "star", "epochS": 0, "warp": 86400, "reset": true, "note": "Round 24: starter warp raised from the Phase N 43,200x interim cap to the Phase W day/s default (the ~1e5x 'inner system visibly moves' target)." },
+    { "name": "laplace-dance", "tier": "icon", "host": "iovis", "target": "iovis", "range": 4500000000, "pitch": 55, "epochS": 0, "warp": 86400, "note": "Phase W showcase: the 4:2:1 Laplace group's conjunction pattern at day/s — the resonant argument is a theorem (K3), watched live." },
+    { "name": "node-regression", "tier": "icon", "host": "tellus", "target": "tellus", "range": 1400000000, "pitch": 50, "epochS": 0, "warp": 315576000, "note": "Phase W showcase: luna's 18.6-y node regression and 8.85-y apsidal advance visibly precess the orbit line at decade/s (the line is a pure function of t)." },
+    { "name": "belt-span", "tier": "icon", "host": "star", "epochS": 0, "warp": 0, "range": 520000000000, "pitch": 62, "yaw": 20, "note": "Phase B: the main belt as orbital-cell scatter over the density field — Kirkwood gaps are data; policed by harness/smallbody-e2e.mjs gate A (CPU-vs-GLSL member positions)." },
+    { "name": "comet-perihelion", "tier": "icon", "host": "cometa", "epochS": -253394424, "warp": 0, "range": 35000000000, "pitch": 14, "yaw": 140, "note": "Phase B: coma + anti-sunward ion tail at the solved perihelion epoch (0.586 AU); the comet solver class holds the corner. Policed by smallbody-e2e gate B (predicted-ray coverage, aphelion negative control)." },
+    { "name": "orbit-line-periapsis", "tier": "breakpoint", "host": "star", "target": "cinis", "epochS": 0, "rangeClass": "system" },
+    { "name": "travel-atomic-handoff", "tier": "breakpoint", "from": "star", "target": "tellus", "capture": "continuous" },
+    { "name": "approach-rocky", "tier": "breakpoint", "target": "tellus", "footprintPx": [64, 72, 80] },
+    { "name": "approach-giant-with-rings", "tier": "breakpoint", "target": "saturn", "footprintPx": [64, 72, 80] },
+    { "name": "approach-figure", "tier": "breakpoint", "target": "haumea", "footprintPx": [64, 72, 80] }
+  ]
+}
